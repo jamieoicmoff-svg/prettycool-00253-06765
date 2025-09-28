@@ -1,12 +1,7 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { Loader } from '@googlemaps/js-api-loader';
-import { MapPin, Navigation, Satellite, Layers, Crosshair, AlertCircle, Key } from 'lucide-react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { MapPin, Navigation, Satellite, Layers, Crosshair } from 'lucide-react';
 import KMZParser, { KMZLocation } from '@/utils/KMZParser';
 import falloutKmzFile from '@/assets/fallout-universe-data.kmz?url';
-import { MOJAVE_LOCATIONS, getLocationById } from '@/data/MojaveLocations';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // Fallout Mojave region bounds (approximate)
 const MOJAVE_BOUNDS = {
@@ -21,7 +16,7 @@ const MOJAVE_CENTER = {
   lng: -115.75
 };
 
-interface GoogleMapsWithFallbackProps {
+interface OfflineGoogleMapProps {
   onSelectLocation: (locationId: string) => void;
   selectedLocation?: string;
   activeCombat?: {
@@ -37,7 +32,13 @@ interface GoogleMapsWithFallbackProps {
   showFullscreen?: boolean;
 }
 
-export const GoogleMapsWithFallback: React.FC<GoogleMapsWithFallbackProps> = ({
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
+export const OfflineGoogleMap: React.FC<OfflineGoogleMapProps> = ({
   onSelectLocation,
   selectedLocation,
   activeCombat,
@@ -46,80 +47,48 @@ export const GoogleMapsWithFallback: React.FC<GoogleMapsWithFallbackProps> = ({
   showFullscreen = false
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
-  const squadMarkerRef = useRef<google.maps.Marker | null>(null);
-  const routeRendererRef = useRef<google.maps.DirectionsRenderer | null>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
+  const squadMarkerRef = useRef<any>(null);
+  const routeRendererRef = useRef<any>(null);
   
   const [isLoaded, setIsLoaded] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
   const [locations, setLocations] = useState<KMZLocation[]>([]);
   const [mapType, setMapType] = useState<'roadmap' | 'satellite' | 'terrain'>('terrain');
   const [squadPosition, setSquadPosition] = useState<{ lat: number; lng: number } | null>(null);
-  const [apiKey, setApiKey] = useState<string>('');
-  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
-  const [isLoadingMap, setIsLoadingMap] = useState(false);
 
-  // Check for stored API key
+  // Load Google Maps API without API key (limited functionality)
   useEffect(() => {
-    const storedKey = localStorage.getItem('google_maps_api_key');
-    if (storedKey) {
-      setApiKey(storedKey);
-      loadGoogleMaps(storedKey);
-    } else {
-      // Try loading without API key first (works for localhost/development)
-      loadGoogleMaps('');
-    }
-  }, []);
-
-  // Load Google Maps API
-  const loadGoogleMaps = async (key: string) => {
-    if (window.google?.maps) {
-      setIsLoaded(true);
-      return;
-    }
-
-    setIsLoadingMap(true);
-    setLoadError(null);
-
-    try {
-      const loader = new Loader({
-        apiKey: key,
-        version: 'weekly',
-        libraries: ['geometry', 'places']
-      });
-
-      await loader.load();
-      setIsLoaded(true);
-      console.log('Google Maps loaded successfully');
-    } catch (error: any) {
-      console.error('Google Maps loading error:', error);
-      
-      if (error.message?.includes('ApiNotActivatedMapError')) {
-        setLoadError('Google Maps API not activated. Please enable the Maps JavaScript API in your Google Cloud Console.');
-      } else if (error.message?.includes('ApiProjectMapError')) {
-        setLoadError('Invalid API key or project configuration.');
-      } else if (error.message?.includes('RefererNotAllowedMapError')) {
-        setLoadError('Domain not authorized. Please add your domain to the API key restrictions.');
-      } else if (!key) {
-        setLoadError('Google Maps API key required for production use.');
-      } else {
-        setLoadError(`Failed to load Google Maps: ${error.message}`);
+    const loadGoogleMaps = async () => {
+      if (window.google) {
+        setIsLoaded(true);
+        return;
       }
-      
-      setShowApiKeyInput(true);
-    } finally {
-      setIsLoadingMap(false);
-    }
-  };
 
-  const handleApiKeySubmit = () => {
-    if (apiKey.trim()) {
-      localStorage.setItem('google_maps_api_key', apiKey.trim());
-      loadGoogleMaps(apiKey.trim());
-      setShowApiKeyInput(false);
-    }
-  };
+      try {
+        // Load Google Maps without API key (limited to localhost/development)
+        const script = document.createElement('script');
+        script.src = 'https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry';
+        script.async = true;
+        script.defer = true;
+        
+        script.onload = () => {
+          setIsLoaded(true);
+        };
+        
+        script.onerror = () => {
+          console.warn('Google Maps failed to load, using fallback');
+          // Will fall back to static map implementation
+        };
+        
+        document.head.appendChild(script);
+      } catch (error) {
+        console.warn('Google Maps not available:', error);
+      }
+    };
+
+    loadGoogleMaps();
+  }, []);
 
   // Parse KMZ file and extract locations
   useEffect(() => {
@@ -135,7 +104,7 @@ export const GoogleMapsWithFallback: React.FC<GoogleMapsWithFallbackProps> = ({
         setLocations(parsedLocations);
       } catch (error) {
         console.error('Failed to parse KMZ file:', error);
-        // Use fallback locations if KMZ parsing fails
+        // Fall back to default locations if KMZ parsing fails
         setLocations([]);
       }
     };
@@ -145,7 +114,7 @@ export const GoogleMapsWithFallback: React.FC<GoogleMapsWithFallbackProps> = ({
 
   // Initialize map
   useEffect(() => {
-    if (!isLoaded || !window.google?.maps || !mapRef.current) return;
+    if (!isLoaded || !window.google || !mapRef.current) return;
 
     try {
       const map = new window.google.maps.Map(mapRef.current, {
@@ -179,7 +148,7 @@ export const GoogleMapsWithFallback: React.FC<GoogleMapsWithFallbackProps> = ({
           }
         ],
         disableDefaultUI: isCompact,
-        gestureHandling: isCompact ? 'cooperative' : 'auto'
+        gestureHandling: isCompact ? 'none' : 'auto'
       });
 
       mapInstanceRef.current = map;
@@ -192,42 +161,35 @@ export const GoogleMapsWithFallback: React.FC<GoogleMapsWithFallbackProps> = ({
       console.log('Google Maps initialized successfully');
     } catch (error) {
       console.error('Failed to initialize Google Maps:', error);
-      setLoadError('Failed to initialize map. Please check your API key.');
     }
   }, [isLoaded, mapType, isCompact, onMapClick]);
 
   // Add location markers
   useEffect(() => {
-    if (!mapInstanceRef.current || !window.google?.maps) return;
+    if (!mapInstanceRef.current || !window.google || locations.length === 0) return;
 
     // Clear existing markers
     markersRef.current.forEach(marker => marker.setMap(null));
     markersRef.current = [];
 
     // Add Shady Sands base marker
-    const baseLocation = MOJAVE_LOCATIONS.find(loc => loc.id === 'shady-sands');
-    if (baseLocation) {
-      const baseMarker = new window.google.maps.Marker({
-        position: { 
-          lat: 36.2 + (baseLocation.coordinates.x - 50) * 0.05, 
-          lng: -115.8 + (baseLocation.coordinates.y - 50) * 0.05 
-        },
-        map: mapInstanceRef.current,
-        title: 'Shady Sands - Base',
-        icon: {
-          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-            <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="16" cy="16" r="12" fill="#3B82F6" stroke="#1E40AF" stroke-width="2"/>
-              <text x="16" y="20" text-anchor="middle" fill="white" font-size="12" font-family="Arial">🏠</text>
-            </svg>
-          `),
-          scaledSize: new window.google.maps.Size(32, 32)
-        },
-        zIndex: 1000
-      });
+    const baseMarker = new window.google.maps.Marker({
+      position: { lat: 36.2, lng: -115.8 }, // Approximate Shady Sands location
+      map: mapInstanceRef.current,
+      title: 'Shady Sands - Base',
+      icon: {
+        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+          <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="12" fill="#3B82F6" stroke="#1E40AF" stroke-width="2"/>
+            <text x="16" y="20" text-anchor="middle" fill="white" font-size="12" font-family="Arial">🏠</text>
+          </svg>
+        `),
+        scaledSize: new window.google.maps.Size(32, 32)
+      },
+      zIndex: 1000
+    });
 
-      markersRef.current.push(baseMarker);
-    }
+    markersRef.current.push(baseMarker);
 
     // Add KMZ locations
     locations.forEach(location => {
@@ -278,56 +240,19 @@ export const GoogleMapsWithFallback: React.FC<GoogleMapsWithFallbackProps> = ({
 
       markersRef.current.push(marker);
     });
-
-    // Add Mojave locations as fallback
-    MOJAVE_LOCATIONS.forEach(location => {
-      const marker = new window.google.maps.Marker({
-        position: { 
-          lat: 36.2 + (location.coordinates.x - 50) * 0.05, 
-          lng: -115.8 + (location.coordinates.y - 50) * 0.05 
-        },
-        map: mapInstanceRef.current,
-        title: location.displayName,
-        icon: {
-          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-            <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="10" cy="10" r="7" fill="${getDangerColor(location.dangerLevel)}" stroke="#000" stroke-width="1"/>
-              <text x="10" y="13" text-anchor="middle" fill="white" font-size="8" font-family="Arial">${location.dangerLevel}</text>
-            </svg>
-          `),
-          scaledSize: new window.google.maps.Size(20, 20)
-        },
-        zIndex: selectedLocation === location.id ? 999 : 50
-      });
-
-      marker.addListener('click', () => {
-        onSelectLocation(location.id);
-      });
-
-      markersRef.current.push(marker);
-    });
-  }, [locations, selectedLocation, onSelectLocation, isLoaded]);
+  }, [locations, selectedLocation, onSelectLocation]);
 
   // Handle active combat visualization
   useEffect(() => {
-    if (!mapInstanceRef.current || !activeCombat || !window.google?.maps) return;
+    if (!mapInstanceRef.current || !activeCombat || !window.google) return;
 
     const targetLocation = locations.find(loc => 
-      loc.name.toLowerCase().includes(activeCombat.target.location?.toLowerCase())
-    ) || MOJAVE_LOCATIONS.find(loc => 
       loc.name.toLowerCase().includes(activeCombat.target.location?.toLowerCase())
     );
 
     if (!targetLocation) return;
 
     const basePosition = { lat: 36.2, lng: -115.8 }; // Shady Sands
-    const targetPos = 'coordinates' in targetLocation && 'lat' in targetLocation.coordinates 
-      ? targetLocation.coordinates
-      : { 
-          lat: 36.2 + ((targetLocation as any).coordinates.x - 50) * 0.05, 
-          lng: -115.8 + ((targetLocation as any).coordinates.y - 50) * 0.05 
-        };
-
     const progress = activeCombat.progress || 0;
     const phase = activeCombat.phase || 'travel';
 
@@ -335,17 +260,20 @@ export const GoogleMapsWithFallback: React.FC<GoogleMapsWithFallbackProps> = ({
     let currentPosition;
     
     if (phase === 'return') {
+      // Returning to base
       const returnProgress = progress > 85 ? (progress - 85) / 15 : 0;
       currentPosition = {
-        lat: targetPos.lat + (basePosition.lat - targetPos.lat) * returnProgress,
-        lng: targetPos.lng + (basePosition.lng - targetPos.lng) * returnProgress
+        lat: targetLocation.coordinates.lat + (basePosition.lat - targetLocation.coordinates.lat) * returnProgress,
+        lng: targetLocation.coordinates.lng + (basePosition.lng - targetLocation.coordinates.lng) * returnProgress
       };
     } else if (phase === 'combat') {
-      currentPosition = targetPos;
+      // Stay at destination during combat
+      currentPosition = targetLocation.coordinates;
     } else {
+      // Travel/setup phase
       currentPosition = {
-        lat: basePosition.lat + (targetPos.lat - basePosition.lat) * (progress / 100),
-        lng: basePosition.lng + (targetPos.lng - basePosition.lng) * (progress / 100)
+        lat: basePosition.lat + (targetLocation.coordinates.lat - basePosition.lat) * (progress / 100),
+        lng: basePosition.lng + (targetLocation.coordinates.lng - basePosition.lng) * (progress / 100)
       };
     }
 
@@ -370,7 +298,7 @@ export const GoogleMapsWithFallback: React.FC<GoogleMapsWithFallbackProps> = ({
         scaledSize: new window.google.maps.Size(32, 32)
       },
       zIndex: 2000,
-      animation: phase === 'combat' ? window.google.maps.Animation.BOUNCE : undefined
+      animation: phase === 'combat' ? window.google.maps.Animation.BOUNCE : null
     });
 
     // Draw route
@@ -387,8 +315,8 @@ export const GoogleMapsWithFallback: React.FC<GoogleMapsWithFallbackProps> = ({
     }
 
     const directionsService = new window.google.maps.DirectionsService();
-    const origin = phase === 'return' ? targetPos : basePosition;
-    const destination = phase === 'return' ? basePosition : targetPos;
+    const origin = phase === 'return' ? targetLocation.coordinates : basePosition;
+    const destination = phase === 'return' ? basePosition : targetLocation.coordinates;
 
     directionsService.route({
       origin: origin,
@@ -429,91 +357,15 @@ export const GoogleMapsWithFallback: React.FC<GoogleMapsWithFallbackProps> = ({
     }
   };
 
-  // Show loading state
-  if (isLoadingMap) {
+  // Fallback to static map if Google Maps fails
+  if (!isLoaded || !window.google) {
     return (
       <div className={`relative ${showFullscreen ? 'h-screen' : isCompact ? 'h-48' : 'h-96'} 
         bg-black/40 backdrop-blur-sm rounded-xl border border-amber-500/20 overflow-hidden flex items-center justify-center`}>
         <div className="text-center text-gray-400">
-          <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50 animate-pulse" />
-          <p className="text-sm">Loading Google Maps...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show API key input if needed
-  if (showApiKeyInput) {
-    return (
-      <div className={`relative ${showFullscreen ? 'h-screen' : isCompact ? 'h-48' : 'h-96'} 
-        bg-black/40 backdrop-blur-sm rounded-xl border border-amber-500/20 overflow-hidden p-6`}>
-        <div className="flex items-center space-x-2 mb-4">
-          <Key className="w-5 h-5 text-amber-400" />
-          <h3 className="text-amber-400 font-bold">Google Maps Setup Required</h3>
-        </div>
-
-        <Alert className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="text-sm">
-            {loadError || 'Google Maps API key is required to load the interactive map with real-time combat tracking.'}
-          </AlertDescription>
-        </Alert>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Google Maps API Key
-            </label>
-            <div className="flex space-x-2">
-              <Input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Enter your Google Maps API key"
-                className="flex-1"
-              />
-              <Button onClick={handleApiKeySubmit} disabled={!apiKey.trim()}>
-                Load Map
-              </Button>
-            </div>
-          </div>
-
-          <div className="text-xs text-gray-400 space-y-2">
-            <div>
-              1. Get an API key from{' '}
-              <a 
-                href="https://console.cloud.google.com/apis/credentials" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="text-blue-400 hover:text-blue-300"
-              >
-                Google Cloud Console
-              </a>
-            </div>
-            <div>2. Enable "Maps JavaScript API" and "Directions API"</div>
-            <div>3. Add your domain to API key restrictions</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state
-  if (loadError && !isLoaded) {
-    return (
-      <div className={`relative ${showFullscreen ? 'h-screen' : isCompact ? 'h-48' : 'h-96'} 
-        bg-black/40 backdrop-blur-sm rounded-xl border border-red-500/20 overflow-hidden flex items-center justify-center`}>
-        <div className="text-center text-red-400 p-4">
-          <AlertCircle className="w-12 h-12 mx-auto mb-2" />
-          <p className="text-sm font-medium mb-2">Failed to Load Google Maps</p>
-          <p className="text-xs text-gray-400 mb-4">{loadError}</p>
-          <Button 
-            onClick={() => setShowApiKeyInput(true)}
-            variant="outline"
-            size="sm"
-          >
-            Configure API Key
-          </Button>
+          <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">Loading Interactive Map...</p>
+          <p className="text-xs mt-1">Parsing location data from KMZ file...</p>
         </div>
       </div>
     );
@@ -577,14 +429,14 @@ export const GoogleMapsWithFallback: React.FC<GoogleMapsWithFallbackProps> = ({
             Mojave Wasteland
           </h3>
           <div className="text-xs text-gray-300 space-y-1">
-            <div>📍 {locations.length} Locations</div>
+            <div>📍 {locations.length} KMZ Locations</div>
             {activeCombat && (
               <>
                 <div className="text-red-400">⚔️ Combat Active</div>
                 <div className="text-blue-400">👥 {activeCombat.assignedSquad.length} Operatives</div>
               </>
             )}
-            <div className="text-green-400">🗺️ Google Maps</div>
+            <div className="text-green-400">🗺️ Real Map Data</div>
           </div>
         </div>
       )}
@@ -593,15 +445,11 @@ export const GoogleMapsWithFallback: React.FC<GoogleMapsWithFallbackProps> = ({
       {selectedLocation && !isCompact && (
         <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-sm rounded-lg p-3 border border-amber-500/30 max-w-xs">
           {(() => {
-            const location = locations.find(loc => loc.id === selectedLocation) ||
-                           MOJAVE_LOCATIONS.find(loc => loc.id === selectedLocation);
+            const location = locations.find(loc => loc.id === selectedLocation);
             if (!location) return null;
-            
             return (
               <div className="text-xs text-gray-300">
-                <div className="text-amber-400 font-semibold mb-1">
-                  {'displayName' in location ? location.displayName : location.name}
-                </div>
+                <div className="text-amber-400 font-semibold mb-1">{location.name}</div>
                 <div className="mb-2">{location.description}</div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
@@ -612,10 +460,10 @@ export const GoogleMapsWithFallback: React.FC<GoogleMapsWithFallbackProps> = ({
                   </div>
                   <div>
                     <span className="text-gray-400">Type:</span>
-                    <span className="ml-1 text-purple-400 capitalize">{location.type}</span>
+                    <span className="ml-1 text-purple-400">{location.type}</span>
                   </div>
                 </div>
-                {'faction' in location && location.faction && (
+                {location.faction && (
                   <div className="mt-1">
                     <span className="text-gray-400">Faction:</span>
                     <span className="ml-1 text-blue-400">{location.faction}</span>
@@ -630,4 +478,4 @@ export const GoogleMapsWithFallback: React.FC<GoogleMapsWithFallbackProps> = ({
   );
 };
 
-export default GoogleMapsWithFallback;
+export default OfflineGoogleMap;

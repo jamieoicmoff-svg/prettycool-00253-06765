@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Map, Layers, Navigation, Eye } from 'lucide-react';
-import { GoogleMapsWithFallback } from './GoogleMapsWithFallback';
+import { CustomInteractiveMap } from './CustomInteractiveMap';
 
 interface FullscreenMapProps {
   onClose: () => void;
@@ -71,7 +71,7 @@ export const FullscreenMap: React.FC<FullscreenMapProps> = ({
 
       {/* Map Content */}
       <div className="flex-1 relative">
-        <GoogleMapsWithFallback
+        <CustomInteractiveMap
           onSelectLocation={onSelectLocation}
           selectedLocation={selectedLocation}
           activeCombat={activeCombat}
