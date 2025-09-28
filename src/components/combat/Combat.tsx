@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '@/context/GameContext';
-import { Sword, Users, Target, Clock, Trophy, AlertTriangle, Star, Zap } from 'lucide-react';
+import { Sword, Users, Target, Clock, Trophy, TriangleAlert as AlertTriangle, Star, Zap } from 'lucide-react';
 import { COMBAT_TARGETS, CombatTarget } from './CombatTargets';
 import { calculateCombatStats, simulateCombat } from '@/utils/CombatCalculations';
 import { getTerrainByLocation, TERRAIN_TYPES } from '@/data/TerrainTypes';

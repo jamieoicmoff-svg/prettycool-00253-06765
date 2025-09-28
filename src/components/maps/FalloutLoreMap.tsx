@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapPin, Target, Navigation, Clock, Users, Crosshair, Route, AlertTriangle, Shield } from 'lucide-react';
+import { MapPin, Target, Navigation, Clock, Users, Crosshair, Route, TriangleAlert as AlertTriangle, Shield } from 'lucide-react';
 import { FALLOUT_LOCATIONS, WASTELAND_ROUTES, getFalloutLocationById, getRoutesBetween, calculateLoreTravelTime } from '@/data/FalloutLocations';
 import falloutMap from '@/assets/fallout-mojave-map.jpg';
 

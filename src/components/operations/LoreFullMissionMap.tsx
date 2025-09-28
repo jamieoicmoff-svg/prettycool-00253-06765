@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, MapPin, Route, Clock, AlertTriangle, Shield, Target } from 'lucide-react';
+import { X, MapPin, Route, Clock, TriangleAlert as AlertTriangle, Shield, Target } from 'lucide-react';
 import { FALLOUT_LOCATIONS, getFalloutLocationById, WASTELAND_ROUTES } from '@/data/FalloutLocations';
 import { Mission } from '@/types/GameTypes';
 import falloutMap from '@/assets/fallout-mojave-map.jpg';

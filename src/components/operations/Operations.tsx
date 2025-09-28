@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
-import { Radio, Clock, MapPin, Users, Star, ChevronRight, AlertTriangle, Target, Crosshair } from 'lucide-react';
+import { Radio, Clock, MapPin, Users, Star, ChevronRight, TriangleAlert as AlertTriangle, Target, Crosshair } from 'lucide-react';
 import { SANDY_SHORES_QUESTLINE } from '@/data/SandyShoresQuests';
 import { LoreMissionTrackingMap } from './LoreMissionTrackingMap';
 import { LoreFullMissionMap } from './LoreFullMissionMap';
