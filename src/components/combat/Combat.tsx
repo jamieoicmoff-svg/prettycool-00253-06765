@@ -6,8 +6,8 @@ import { calculateCombatStats, simulateCombat } from '@/utils/CombatCalculations
 import { getTerrainByLocation, TERRAIN_TYPES } from '@/data/TerrainTypes';
 import { calculateUniversalCombatDuration } from '@/utils/combat/UniversalCombatFormula';
 import combatSound from '@/assets/Combat-and-operations-sound.mp3';
-import CombatOperationsMap from '../operations/CombatOperationsMap';
-import { FullscreenMap } from '../maps/FullscreenMap';
+import { LoreCombatMap } from '../operations/LoreCombatMap';
+import { LoreAccurateFullMap } from '../maps/LoreAccurateFullMap';
 
 
 export const Combat = () => {
@@ -426,8 +426,8 @@ const enhancedCombatTargets = [
       {/* Active Combat Missions */}
       {renderActiveCombatMissions()}
       
-      {/* Combat Operations Map */}
-      <CombatOperationsMap
+      {/* Lore-Accurate Combat Operations Map */}
+      <LoreCombatMap
         onSelectLocation={setSelectedLocation}
         selectedLocation={selectedLocation}
         activeCombat={ongoingCombatMissions.length > 0 ? {
@@ -439,9 +439,9 @@ const enhancedCombatTargets = [
         onMapClick={() => setShowFullMap(true)}
       />
       
-      {/* Full Map Modal */}
+      {/* Lore-Accurate Full Map Modal */}
       {showFullMap && (
-        <FullscreenMap
+        <LoreAccurateFullMap
           onClose={() => setShowFullMap(false)}
           onSelectLocation={setSelectedLocation}
           selectedLocation={selectedLocation}
