@@ -132,7 +132,6 @@ const GameContent = () => {
         onLoadStart={() => console.log('Video started loading')}
         onCanPlay={() => console.log('Video can play')}
       >
-        <source src="https://assets.fallout.tv/fallout-bg-video.mp4" type="video/mp4" />
       </video>
       
       {/* Fallback background image if video fails */}
