@@ -113,6 +113,12 @@ export const EnhancedCombatMap: React.FC<EnhancedCombatMapProps> = ({
 
         mapInstanceRef.current = map;
 
+        // Clear any existing markers
+        markersRef.current.forEach(marker => {
+          marker.setMap(null);
+        });
+        markersRef.current = [];
+
         // Add base marker
         const baseMarker = new google.maps.Marker({
           position: baseLocation.coordinates,
@@ -121,6 +127,8 @@ export const EnhancedCombatMap: React.FC<EnhancedCombatMapProps> = ({
           icon: getBaseIcon(),
           zIndex: 1000
         });
+
+        markersRef.current.push(baseMarker);
 
         // Add location markers
         ENHANCED_MOJAVE_LOCATIONS.forEach(location => {
@@ -155,6 +163,26 @@ export const EnhancedCombatMap: React.FC<EnhancedCombatMapProps> = ({
     } else {
       setError('Google Maps API key not configured');
     }
+
+    // Cleanup function
+    return () => {
+      if (squadMarkerRef.current) {
+        squadMarkerRef.current.setMap(null);
+        squadMarkerRef.current = null;
+      }
+      if (routeRendererRef.current) {
+        routeRendererRef.current.setMap(null);
+        routeRendererRef.current = null;
+      }
+      markersRef.current.forEach(marker => {
+        marker.setMap(null);
+      });
+      markersRef.current = [];
+      if (mapInstanceRef.current) {
+        // Don't try to manipulate the DOM directly, just clear the reference
+        mapInstanceRef.current = null;
+      }
+    };
   }, [selectedLocation, onSelectLocation, isCompact, baseLocation]);
 
   // Update selected location marker
@@ -187,6 +215,15 @@ export const EnhancedCombatMap: React.FC<EnhancedCombatMapProps> = ({
       });
       routeRendererRef.current.setMap(mapInstanceRef.current);
     }
+
+    // Update route color based on phase
+    routeRendererRef.current.setOptions({
+      polylineOptions: {
+        strokeColor: currentPhase === 'return' ? '#22C55E' : '#3B82F6',
+        strokeWeight: 4,
+        strokeOpacity: 0.7
+      }
+    });
 
     // Get directions
     const directionsService = new google.maps.DirectionsService();
@@ -237,6 +274,14 @@ export const EnhancedCombatMap: React.FC<EnhancedCombatMapProps> = ({
         }
       }
     });
+
+    // Cleanup function for this effect
+    return () => {
+      if (routeRendererRef.current) {
+        routeRendererRef.current.setMap(null);
+        routeRendererRef.current = null;
+      }
+    };
   }, [activeCombat, currentPhase, baseLocation]);
 
   // Update squad marker
@@ -245,6 +290,7 @@ export const EnhancedCombatMap: React.FC<EnhancedCombatMapProps> = ({
 
     if (squadMarkerRef.current) {
       squadMarkerRef.current.setMap(null);
+      squadMarkerRef.current = null;
     }
 
     if (squadPosition && activeCombat) {
@@ -257,6 +303,14 @@ export const EnhancedCombatMap: React.FC<EnhancedCombatMapProps> = ({
         animation: currentPhase === 'combat' ? google.maps.Animation.BOUNCE : undefined
       });
     }
+
+    // Cleanup function for this effect
+    return () => {
+      if (squadMarkerRef.current) {
+        squadMarkerRef.current.setMap(null);
+        squadMarkerRef.current = null;
+      }
+    };
   }, [squadPosition, currentPhase, activeCombat]);
 
   // Calculate time remaining
