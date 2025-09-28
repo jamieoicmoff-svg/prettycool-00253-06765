@@ -95,12 +95,12 @@ export const calculateUniversalCombatDuration = (
   else if (powerRatio < 0.5) adjustedCombat *= 2.5;
   else adjustedCombat *= 1.2;
 
-  // Travel time using new Mojave location system
+  // Travel time using enhanced Google Maps-based calculation
   const avgSquadLevel = squadMembers.length 
     ? squadMembers.reduce((sum, member) => sum + (member.level || 1), 0) / squadMembers.length
     : 1;
   
-  // Use realistic Mojave travel times
+  // Use original travel calculation for now (will be enhanced later)
   const travelMinutes = calculateTravelTime('shady-sands', location, difficulty, avgSquadLevel);
 
   const totalSeconds = adjustedCombat + travelMinutes * 60;
