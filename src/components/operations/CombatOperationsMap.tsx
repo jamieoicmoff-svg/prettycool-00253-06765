@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MapPin, Clock, Users, Route, Eye, Crosshair } from 'lucide-react';
 import { MOJAVE_LOCATIONS, getLocationById, calculateTravelTime } from '@/data/MojaveLocations';
 import { CombatTarget } from '@/components/combat/CombatTargets';
-import { CustomInteractiveMap } from '@/components/maps/CustomInteractiveMap';
+import { OfflineGoogleMap } from '@/components/maps/OfflineGoogleMap';
 import { FullscreenMap } from '@/components/maps/FullscreenMap';
 
 interface CombatOperationsMapProps {
@@ -120,8 +120,8 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
           </div>
         )}
         
-        {/* Interactive Map */}
-        <CustomInteractiveMap
+        {/* Offline Google Map with KMZ Data */}
+        <OfflineGoogleMap
           onSelectLocation={onSelectLocation}
           selectedLocation={selectedLocation}
           activeCombat={activeCombat ? {
