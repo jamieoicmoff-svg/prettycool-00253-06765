@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Map, Satellite, Layers, Navigation } from 'lucide-react';
-import { EnhancedCombatMap } from './EnhancedCombatMap';
+import { OfflineFalloutMap } from './OfflineFalloutMap';
 
 interface FullGoogleCombatMapProps {
   onClose: () => void;
@@ -82,11 +82,12 @@ export const FullGoogleCombatMap: React.FC<FullGoogleCombatMapProps> = ({
 
       {/* Map Content */}
       <div className="flex-1 relative">
-        <EnhancedCombatMap
+        <OfflineFalloutMap
           onSelectLocation={onSelectLocation}
           selectedLocation={selectedLocation}
           activeCombat={activeCombat}
           isCompact={false}
+          showFullscreen={true}
         />
       </div>
 
