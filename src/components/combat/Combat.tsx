@@ -7,7 +7,7 @@ import { getTerrainByLocation, TERRAIN_TYPES } from '@/data/TerrainTypes';
 import { calculateUniversalCombatDuration } from '@/utils/combat/UniversalCombatFormula';
 import combatSound from '@/assets/Combat-and-operations-sound.mp3';
 import CombatOperationsMap from '../operations/CombatOperationsMap';
-import FullCombatMap from '../operations/FullCombatMap';
+import { FullscreenMap } from '../maps/FullscreenMap';
 
 
 export const Combat = () => {
@@ -441,7 +441,7 @@ const enhancedCombatTargets = [
       
       {/* Full Map Modal */}
       {showFullMap && (
-        <FullCombatMap
+        <FullscreenMap
           onClose={() => setShowFullMap(false)}
           onSelectLocation={setSelectedLocation}
           selectedLocation={selectedLocation}

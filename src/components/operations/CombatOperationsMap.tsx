@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { MapPin, Clock, Users, Route, Eye, Crosshair } from 'lucide-react';
 import { MOJAVE_LOCATIONS, getLocationById, calculateTravelTime } from '@/data/MojaveLocations';
 import { CombatTarget } from '@/components/combat/CombatTargets';
-import { EnhancedCombatMap } from '@/components/maps/EnhancedCombatMap';
-import { FullGoogleCombatMap } from '@/components/maps/FullGoogleCombatMap';
-import { MapApiKeyInput } from '@/components/maps/MapApiKeyInput';
-import falloutMap from '@/assets/fallout-mojave-map.jpg';
+import { CustomInteractiveMap } from '@/components/maps/CustomInteractiveMap';
+import { FullscreenMap } from '@/components/maps/FullscreenMap';
 
 interface CombatOperationsMapProps {
   onSelectLocation: (locationId: string) => void;
@@ -28,16 +26,8 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
   const [progress, setProgress] = useState(0);
   const [showFullMap, setShowFullMap] = useState(false);
   const [currentPhase, setCurrentPhase] = useState<'travel' | 'setup' | 'combat' | 'return'>('travel');
-  const [hasApiKey, setHasApiKey] = useState(false);
-  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   
   const baseLocation = getLocationById('shady-sands')!;
-
-  // Check for API key on mount
-  useEffect(() => {
-    const apiKey = localStorage.getItem('google_maps_api_key') || process.env.GOOGLE_MAPS_API_KEY;
-    setHasApiKey(!!apiKey);
-  }, []);
   
   useEffect(() => {
     if (!activeCombat) return;
@@ -75,17 +65,11 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
     const seconds = Math.floor((remaining % 60000) / 1000);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
-  
-  // Handle API key setup
-  const handleApiKeySet = (apiKey: string) => {
-    setHasApiKey(true);
-    setShowApiKeyInput(false);
-  };
 
   return (
     <>
-      {showFullMap && hasApiKey && (
-        <FullGoogleCombatMap
+      {showFullMap && (
+        <FullscreenMap
           onClose={() => setShowFullMap(false)}
           onSelectLocation={onSelectLocation}
           selectedLocation={selectedLocation}
@@ -96,15 +80,48 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
           } : undefined}
         />
       )}
-
-      {showApiKeyInput && (
-        <div className="mb-4">
-          <MapApiKeyInput onApiKeySet={handleApiKeySet} />
-        </div>
-      )}
       
-      {hasApiKey ? (
-        <EnhancedCombatMap
+      <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-amber-500/20 p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-2">
+            <Crosshair className="w-5 h-5 text-red-400" />
+            <h3 className="text-red-400 font-bold">Combat Operations Map</h3>
+          </div>
+          <button
+            onClick={() => setShowFullMap(true)}
+            className="flex items-center space-x-1 text-blue-400 hover:text-blue-300 transition-colors"
+          >
+            <Eye className="w-4 h-4" />
+            <span className="text-sm">Full Map</span>
+          </button>
+        </div>
+        
+        {/* Active Combat Info */}
+        {activeCombat && (
+          <div className="grid grid-cols-3 gap-3 mb-4 text-sm">
+            <div className="text-center">
+              <div className="text-gray-400">Progress</div>
+              <div className="text-green-400 font-bold">{Math.round(progress)}%</div>
+            </div>
+            <div className="text-center">
+              <div className="text-gray-400">ETA</div>
+              <div className="text-blue-400 font-bold">{getTimeRemaining()}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-gray-400">Phase</div>
+              <div className={`font-bold ${
+                currentPhase === 'travel' ? 'text-yellow-400' :
+                currentPhase === 'setup' ? 'text-blue-400' :
+                currentPhase === 'combat' ? 'text-red-400' : 'text-green-400'
+              }`}>
+                {currentPhase.toUpperCase()}
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Interactive Map */}
+        <CustomInteractiveMap
           onSelectLocation={onSelectLocation}
           selectedLocation={selectedLocation}
           activeCombat={activeCombat ? {
@@ -115,30 +132,38 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
           onMapClick={() => setShowFullMap(true)}
           isCompact={true}
         />
-      ) : (
-        <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-amber-500/20 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center space-x-2">
-              <Crosshair className="w-5 h-5 text-red-400" />
-              <h3 className="text-red-400 font-bold">Combat Operations Map</h3>
-            </div>
-            <button
-              onClick={() => setShowApiKeyInput(true)}
-              className="flex items-center space-x-1 text-blue-400 hover:text-blue-300 transition-colors"
-            >
-              <Eye className="w-4 h-4" />
-              <span className="text-sm">Setup Enhanced Map</span>
-            </button>
+        
+        {/* Selected Location Details */}
+        {selectedLocation && (
+          <div className="mt-3 text-xs">
+            {(() => {
+              const location = getLocationById(selectedLocation);
+              if (!location) return null;
+              return (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <div className="text-gray-400">Target</div>
+                    <div className="text-white">{location.displayName}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-400">Danger Level</div>
+                    <div className={`font-bold ${
+                      location.dangerLevel > 7 ? 'text-red-400' :
+                      location.dangerLevel > 4 ? 'text-orange-400' : 'text-green-400'
+                    }`}>
+                      {location.dangerLevel}/10
+                    </div>
+                  </div>
+                  <div className="col-span-2">
+                    <div className="text-gray-400">Description</div>
+                    <div className="text-white text-xs">{location.description}</div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
-          
-          {/* Fallback to original static map */}
-          <div className="text-center text-gray-400 py-8">
-            <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            <p className="text-sm mb-2">Enhanced Google Maps not configured</p>
-            <p className="text-xs">Click "Setup Enhanced Map" to enable interactive maps with real-time routing</p>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </>
   );
 };
