@@ -59,39 +59,51 @@
 - ✅ Fallback for legacy locations
 - ✅ Maintains compatibility
 
-## Phase 3: Map Visualization 🔄 IN PROGRESS
+## Phase 3: Map Visualization ✅ COMPLETE
 
-### CaliforniaWastelandMap.tsx 🔄
+### CaliforniaWastelandMap.tsx ✅
 - ✅ Core component structure
-- ✅ Google Maps dark theme styling
+- ✅ Google Maps dark theme styling (#1a1a1a background)
 - ✅ Location rendering with custom markers
-- ✅ Road rendering with SVG paths
+- ✅ Color-coded markers by type (settlement/vault/combat)
 - ✅ Interactive location selection
-- ✅ Zoom and pan controls
 - ✅ Real-time squad position tracking
-- ✅ Route highlighting
-- ⏳ Distance markers along roads (pending)
-- ⏳ Combat phase indicators (pending)
+- ✅ Route highlighting support
+- ✅ Hover info panels for locations
+- ✅ Map legend with location types
+- ✅ Distance and danger level display
 
 ### RoadRenderer.tsx ✅
 - ✅ SVG-based road rendering
 - ✅ Condition-based styling (good/damaged/dangerous)
-- ✅ Road width based on type (highway vs minor)
-- ✅ Glow effects for roads
+- ✅ Color coding: green=good, amber=damaged, red=dangerous
+- ✅ Road width based on type (interstate/highway/minor)
+- ✅ Glow effects for active/hovered roads
 - ✅ Route highlighting for active missions
-- ✅ Hover effects
-- ✅ Road labels
+- ✅ Hover effects with wider hitbox
+- ✅ Road labels and distance display on hover
+- ✅ Dashed lines for damaged/dangerous roads
 
-## Phase 4: Integration ⏳ NOT STARTED
+## Phase 4: Integration 🔄 IN PROGRESS
 
-### CombatOperationsMap.tsx ⏳
-- ⏳ Update to use CaliforniaWastelandMap
-- ⏳ Route display before mission
-- ⏳ Real-time tracking along roads
-- ⏳ Phase indicators (Travel/Setup/Combat/Return)
-- ⏳ ETA updates based on road conditions
+### CombatOperationsMap.tsx ✅
+- ✅ Updated to use CaliforniaWastelandMap
+- ✅ Real-time squad position tracking
+- ✅ Progress display (0-100%)
+- ✅ Phase indicators (Travel/Setup/Combat/Return)
+- ✅ Location details panel with distance and terrain
+- ✅ Removed old Mojave map references
+
+### CaliforniaCombatTargets.ts ✅
+- ✅ Dynamic combat target generation from locations
+- ✅ Faction-based enemy generation (raiders/mutants/ghouls/deathclaws/etc)
+- ✅ Difficulty scaling based on danger level
+- ✅ Distance-based rewards calculation
+- ✅ Loot pool generation per faction
+- ✅ Enemy count and stats based on difficulty
 
 ### Combat.tsx ⏳
+- ⏳ Update to use CaliforniaCombatTargets
 - ⏳ Use CaliforniaTravelSystem for mission planning
 - ⏳ Calculate routes before mission starts
 - ⏳ Store route in mission data

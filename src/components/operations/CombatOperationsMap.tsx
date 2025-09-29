@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Clock, Users, Route, Eye, Crosshair } from 'lucide-react';
-import { MOJAVE_LOCATIONS, getLocationById, calculateTravelTime } from '@/data/MojaveLocations';
+import { CALIFORNIA_LOCATIONS, getCaliforniaLocationById } from '@/data/CaliforniaLocations';
 import { CombatTarget } from '@/components/combat/CombatTargets';
-import { CustomInteractiveMap } from '@/components/maps/CustomInteractiveMap';
-import { FullscreenMap } from '@/components/maps/FullscreenMap';
+import { CaliforniaWastelandMap } from '@/components/maps/CaliforniaWastelandMap';
 
 interface CombatOperationsMapProps {
   onSelectLocation: (locationId: string) => void;
@@ -24,10 +23,7 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
   onMapClick 
 }) => {
   const [progress, setProgress] = useState(0);
-  const [showFullMap, setShowFullMap] = useState(false);
   const [currentPhase, setCurrentPhase] = useState<'travel' | 'setup' | 'combat' | 'return'>('travel');
-  
-  const baseLocation = getLocationById('shady-sands')!;
   
   useEffect(() => {
     if (!activeCombat) return;
@@ -54,7 +50,7 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
     const interval = setInterval(updateProgress, 2000); // Update every 2 seconds
     
     return () => clearInterval(interval);
-  }, [activeCombat, baseLocation]);
+  }, [activeCombat]);
   
   const getTimeRemaining = () => {
     if (!activeCombat) return '';
@@ -67,34 +63,13 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
   };
 
   return (
-    <>
-      {showFullMap && (
-        <FullscreenMap
-          onClose={() => setShowFullMap(false)}
-          onSelectLocation={onSelectLocation}
-          selectedLocation={selectedLocation}
-          activeCombat={activeCombat ? {
-            ...activeCombat,
-            phase: currentPhase,
-            progress: progress
-          } : undefined}
-        />
-      )}
-      
-      <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-amber-500/20 p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-2">
-            <Crosshair className="w-5 h-5 text-red-400" />
-            <h3 className="text-red-400 font-bold">Combat Operations Map</h3>
-          </div>
-          <button
-            onClick={() => setShowFullMap(true)}
-            className="flex items-center space-x-1 text-blue-400 hover:text-blue-300 transition-colors"
-          >
-            <Eye className="w-4 h-4" />
-            <span className="text-sm">Full Map</span>
-          </button>
+    <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-amber-500/20 p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center space-x-2">
+          <Crosshair className="w-5 h-5 text-red-400" />
+          <h3 className="text-red-400 font-bold">Combat Operations Map</h3>
         </div>
+      </div>
         
         {/* Active Combat Info */}
         {activeCombat && (
@@ -120,30 +95,31 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
           </div>
         )}
         
-        {/* Interactive Map */}
-        <CustomInteractiveMap
-          onSelectLocation={onSelectLocation}
-          selectedLocation={selectedLocation}
-          activeCombat={activeCombat ? {
-            ...activeCombat,
-            phase: currentPhase,
-            progress: progress
-          } : undefined}
-          onMapClick={() => setShowFullMap(true)}
-          isCompact={true}
-        />
+        {/* California Wasteland Map */}
+        <div className="h-[500px]">
+          <CaliforniaWastelandMap
+            onLocationSelect={(location) => onSelectLocation(location.id)}
+            selectedLocationId={selectedLocation}
+            showSquadPosition={!!activeCombat}
+            squadProgress={progress}
+          />
+        </div>
         
         {/* Selected Location Details */}
         {selectedLocation && (
           <div className="mt-3 text-xs">
             {(() => {
-              const location = getLocationById(selectedLocation);
+              const location = getCaliforniaLocationById(selectedLocation);
               if (!location) return null;
               return (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <div className="text-gray-400">Target</div>
-                    <div className="text-white">{location.displayName}</div>
+                    <div className="text-white">{location.name}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-400">Distance</div>
+                    <div className="text-blue-400 font-bold">{location.distanceFromShadySands} mi</div>
                   </div>
                   <div>
                     <div className="text-gray-400">Danger Level</div>
@@ -154,6 +130,10 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
                       {location.dangerLevel}/10
                     </div>
                   </div>
+                  <div>
+                    <div className="text-gray-400">Terrain</div>
+                    <div className="text-white capitalize">{location.terrain}</div>
+                  </div>
                   <div className="col-span-2">
                     <div className="text-gray-400">Description</div>
                     <div className="text-white text-xs">{location.description}</div>
@@ -163,8 +143,7 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
             })()}
           </div>
         )}
-      </div>
-    </>
+    </div>
   );
 };
 
