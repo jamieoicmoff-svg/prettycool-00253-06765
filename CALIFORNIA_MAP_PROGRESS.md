@@ -1,7 +1,8 @@
 # California Map Implementation Progress
 
-**Last Updated**: Initial Setup  
-**Status**: In Progress
+**Last Updated**: 2025-09-29 - Major Refinement Plan Created  
+**Status**: Ready for Phase 1 - Comprehensive Overhaul  
+**New Plan**: See `CALIFORNIA_MAP_REFINEMENT_PLAN.md` for complete details
 
 ## Phase 1: Core Data ✅ COMPLETE
 
@@ -130,14 +131,71 @@
 
 None yet - implementation just started.
 
-## Next Steps
+## NEW REFINEMENT PLAN - Phase Overview
 
-1. Complete CaliforniaWastelandMap.tsx distance markers
-2. Add combat phase indicators to map
-3. Integrate CaliforniaWastelandMap into CombatOperationsMap.tsx
-4. Update Combat.tsx to use road-based travel
-5. Update gameReducer.ts for route tracking
-6. Full end-to-end testing
+### Phase 1: Core Data Updates ⏳ NOT STARTED
+- [ ] Update CaliforniaLocations.ts with real California geographic positions
+- [ ] Add 10 unique local combat zones near Player Settlement
+- [ ] Add pre-war buildings and faction control data
+- [ ] Rewrite CaliforniaRoads.ts based on real California highways (I-5, I-15, I-80, etc.)
+- [ ] Add Bezier curve control points for realistic road shapes
+- [ ] Update GameTypes.ts with discovery fields
+
+### Phase 2: Discovery System ⏳ NOT STARTED
+- [ ] Create LocationDiscoverySystem.ts (fog of war)
+- [ ] Update gameReducer.ts with discoveredLocations state
+- [ ] Add DISCOVER_LOCATION and DISCOVER_NEARBY_LOCATIONS actions
+- [ ] Initialize with Player Settlement + nearby locations visible
+- [ ] Major cities (Shady Sands, New Vegas) start undiscovered
+
+### Phase 3: Map Visual Updates ⏳ NOT STARTED
+- [ ] Update CaliforniaWastelandMap.tsx dimensions (1000x600 embedded, 1600x1200 fullscreen)
+- [ ] Add embedded/fullscreen mode toggle
+- [ ] Filter locations by discovery status
+- [ ] Add "click to expand" functionality
+- [ ] Update RoadRenderer.tsx to use Bezier curves
+- [ ] Add interactive click handlers for roads
+
+### Phase 4: Fullscreen Mode ⏳ NOT STARTED
+- [ ] Create FullscreenCaliforniaMap.tsx component
+- [ ] Implement zoom controls (1x-4x range)
+- [ ] Implement pan controls (drag, WASD keys)
+- [ ] Add mobile touch controls (pinch zoom, drag pan)
+- [ ] Add keyboard shortcuts (ESC to close, +/- to zoom)
+- [ ] Smooth transitions and animations
+
+### Phase 5: Info Panels ⏳ NOT STARTED
+- [ ] Create LocationInfoPanel.tsx (detailed location info)
+- [ ] Create RoadInfoPanel.tsx (road details)
+- [ ] Add click handlers to show info panels
+- [ ] Display pre-war buildings, factions, resources
+- [ ] Add action buttons (Send Mission, Trade, Travel)
+
+### Phase 6: Mobile Optimization ⏳ NOT STARTED
+- [ ] Reduce minimap height to 400px on mobile
+- [ ] Implement pinch-to-zoom gesture
+- [ ] Add bottom sheet UI for info panels
+- [ ] Test on various mobile screen sizes
+- [ ] Optimize performance for mobile devices
+
+### Phase 7: Testing & Polish ⏳ NOT STARTED
+- [ ] Verify geographic accuracy of all locations
+- [ ] Test pathfinding with new road network
+- [ ] Test zoom/pan on desktop and mobile
+- [ ] Verify discovery system functionality
+- [ ] Performance optimization
+- [ ] Final visual polish
+
+## Key Changes from Original Plan
+
+1. **Geographic Accuracy**: All locations now match REAL California geography
+2. **Map Sizing**: Fixed wasted space, added fullscreen with zoom/pan
+3. **Discovery System**: Major cities hidden until discovered
+4. **Real Roads**: Based on actual California highways (I-5, Highway 1, etc.)
+5. **Local Combat**: 10 unique locations near Player Settlement
+6. **Interactive**: Click roads/cities for detailed info panels
+7. **Mobile Support**: Touch controls, responsive sizing
+8. **Lore Accurate**: Pre-war buildings, faction outposts match Fallout canon
 
 ## AI Notes
 
