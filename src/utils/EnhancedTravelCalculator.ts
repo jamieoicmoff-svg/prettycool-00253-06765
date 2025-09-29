@@ -1,202 +1,17 @@
-import KMZParser from './KMZParser';
-import { MOJAVE_LOCATIONS, getLocationById } from '@/data/MojaveLocations';
+import { ENHANCED_MOJAVE_LOCATIONS, getLocationByIdEnhanced } from '@/components/maps/GoogleMapsConfig';
 
-export interface TravelCalculation {
-  estimatedDuration: number; // in minutes
-  realDistance: number; // in kilometers
-  route: { lat: number; lng: number }[];
-  dangerFactors: string[];
-  terrainModifiers: string[];
-  squadEfficiency: number;
-  weatherImpact: number;
-}
-
+// Enhanced travel time calculation using Google Maps-style routing
 export class EnhancedTravelCalculator {
   private static instance: EnhancedTravelCalculator;
-  private kmzParser: KMZParser;
-
-  constructor() {
-    this.kmzParser = KMZParser.getInstance();
+  
+  static getInstance(): EnhancedTravelCalculator {
+    if (!this.instance) {
+      this.instance = new EnhancedTravelCalculator();
+    }
+    return this.instance;
   }
 
-  public static getInstance(): EnhancedTravelCalculator {
-    if (!EnhancedTravelCalculator.instance) {
-      EnhancedTravelCalculator.instance = new EnhancedTravelCalculator();
-    }
-    return EnhancedTravelCalculator.instance;
-  }
-
-  calculateRealTravelTime(
-    fromLocationId: string,
-    toLocationId: string,
-    squadLevel: number = 1,
-    squadSize: number = 1,
-    weatherCondition: string = 'clear',
-    timeOfDay: 'day' | 'night' = 'day'
-  ): TravelCalculation {
-    // Try to use KMZ data first, fall back to default locations
-    let fromLocation = this.kmzParser.getLocationById(fromLocationId);
-    let toLocation = this.kmzParser.getLocationById(toLocationId);
-
-    // Fallback to default locations if KMZ data not available
-    if (!fromLocation) {
-      const fallbackFrom = getLocationById(fromLocationId);
-      if (fallbackFrom) {
-        fromLocation = {
-          id: fallbackFrom.id,
-          name: fallbackFrom.name,
-          description: fallbackFrom.description,
-          coordinates: {
-            lat: 36.2 + (fallbackFrom.coordinates.x - 50) * 0.05, // Convert % to approx lat/lng
-            lng: -115.8 + (fallbackFrom.coordinates.y - 50) * 0.05,
-          },
-          type: fallbackFrom.type,
-          dangerLevel: fallbackFrom.dangerLevel
-        };
-      }
-    }
-
-    if (!toLocation) {
-      const fallbackTo = getLocationById(toLocationId);
-      if (fallbackTo) {
-        toLocation = {
-          id: fallbackTo.id,
-          name: fallbackTo.name,
-          description: fallbackTo.description,
-          coordinates: {
-            lat: 36.2 + (fallbackTo.coordinates.x - 50) * 0.05,
-            lng: -115.8 + (fallbackTo.coordinates.y - 50) * 0.05,
-          },
-          type: fallbackTo.type,
-          dangerLevel: fallbackTo.dangerLevel
-        };
-      }
-    }
-
-    if (!fromLocation || !toLocation) {
-      return {
-        estimatedDuration: 30,
-        realDistance: 10,
-        route: [],
-        dangerFactors: ['Unknown route'],
-        terrainModifiers: [],
-        squadEfficiency: 1.0,
-        weatherImpact: 1.0
-      };
-    }
-
-    // Calculate real distance using Haversine formula
-    const realDistance = this.calculateHaversineDistance(
-      fromLocation.coordinates.lat,
-      fromLocation.coordinates.lng,
-      toLocation.coordinates.lat,
-      toLocation.coordinates.lng
-    );
-
-    // Generate route points (simplified pathfinding)
-    const route = this.generateRoutePoints(fromLocation.coordinates, toLocation.coordinates);
-
-    // Base travel calculation
-    // Wasteland travel speed: ~2-4 km/h depending on conditions
-    let baseSpeed = 3; // km/h base walking speed in wasteland
-    let travelTime = realDistance / baseSpeed; // hours
-
-    // Apply various modifiers
-    const dangerFactors: string[] = [];
-    const terrainModifiers: string[] = [];
-
-    // Danger level modifiers
-    const avgDanger = (fromLocation.dangerLevel + toLocation.dangerLevel) / 2;
-    if (avgDanger > 7) {
-      baseSpeed *= 0.6; // Extreme danger slows travel significantly
-      dangerFactors.push('Extreme danger zone');
-    } else if (avgDanger > 4) {
-      baseSpeed *= 0.8; // Moderate danger
-      dangerFactors.push('Hostile territory');
-    } else if (avgDanger > 2) {
-      baseSpeed *= 0.9; // Low danger
-      dangerFactors.push('Patrol zones');
-    }
-
-    // Squad efficiency modifiers
-    const squadEfficiency = Math.min(1.5, 0.8 + (squadLevel * 0.1) + (squadSize * 0.05));
-    baseSpeed *= squadEfficiency;
-
-    // Squad size considerations
-    if (squadSize > 6) {
-      baseSpeed *= 0.9; // Large groups move slower
-      terrainModifiers.push('Large group coordination');
-    } else if (squadSize < 3) {
-      baseSpeed *= 1.1; // Small groups move faster
-      terrainModifiers.push('Small unit mobility');
-    }
-
-    // Weather impact
-    let weatherImpact = 1.0;
-    switch (weatherCondition) {
-      case 'dust-storm':
-        weatherImpact = 0.5;
-        terrainModifiers.push('Dust storm visibility');
-        break;
-      case 'radiation-storm':
-        weatherImpact = 0.4;
-        terrainModifiers.push('Radiation storm hazard');
-        break;
-      case 'fog':
-        weatherImpact = 0.7;
-        terrainModifiers.push('Limited visibility');
-        break;
-      case 'light-rain':
-        weatherImpact = 0.9;
-        terrainModifiers.push('Wet conditions');
-        break;
-      case 'overcast':
-        weatherImpact = 0.95;
-        break;
-      default: // clear
-        weatherImpact = 1.0;
-    }
-    baseSpeed *= weatherImpact;
-
-    // Time of day modifiers
-    if (timeOfDay === 'night') {
-      baseSpeed *= 0.7; // Night travel is slower and more dangerous
-      terrainModifiers.push('Night operations');
-      dangerFactors.push('Reduced visibility');
-    }
-
-    // Terrain type modifiers based on location types
-    if (fromLocation.type === 'vault' || toLocation.type === 'vault') {
-      baseSpeed *= 0.8; // Underground access is slower
-      terrainModifiers.push('Underground access');
-    }
-
-    if (fromLocation.type === 'ruins' || toLocation.type === 'ruins') {
-      baseSpeed *= 0.9; // Ruins require careful navigation
-      terrainModifiers.push('Ruined terrain');
-    }
-
-    if (fromLocation.type === 'facility' || toLocation.type === 'facility') {
-      baseSpeed *= 0.95; // Industrial areas may have obstacles
-      terrainModifiers.push('Industrial zone');
-    }
-
-    // Calculate final travel time
-    travelTime = realDistance / baseSpeed; // hours
-    const travelTimeMinutes = Math.max(5, Math.round(travelTime * 60)); // Convert to minutes, minimum 5 minutes
-
-    return {
-      estimatedDuration: travelTimeMinutes,
-      realDistance: Math.round(realDistance * 100) / 100,
-      route,
-      dangerFactors,
-      terrainModifiers,
-      squadEfficiency: Math.round(squadEfficiency * 100) / 100,
-      weatherImpact: Math.round(weatherImpact * 100) / 100
-    };
-  }
-
-  // Legacy method for backward compatibility
+  // Calculate realistic travel time between two locations using road distance
   calculateTravelTime(
     fromLocationId: string, 
     toLocationId: string, 
@@ -204,19 +19,55 @@ export class EnhancedTravelCalculator {
     squadLevel: number = 1,
     vehicleType: 'foot' | 'vehicle' = 'foot'
   ): number {
-    const result = this.calculateRealTravelTime(fromLocationId, toLocationId, squadLevel);
-    return result.estimatedDuration;
+    const fromLocation = getLocationByIdEnhanced(fromLocationId);
+    const toLocation = getLocationByIdEnhanced(toLocationId);
+    
+    if (!fromLocation || !toLocation) {
+      return 30; // Default 30 minutes
+    }
+
+    // Calculate straight-line distance first
+    const straightLineDistance = this.calculateDistance(
+      fromLocation.coordinates.lat,
+      fromLocation.coordinates.lng,
+      toLocation.coordinates.lat,
+      toLocation.coordinates.lng
+    );
+
+    // Apply road factor (roads aren't straight lines)
+    const roadFactor = this.getRoadFactor(fromLocation.type, toLocation.type);
+    const actualDistance = straightLineDistance * roadFactor;
+
+    // Base travel speed (km/h) - wasteland travel is slow
+    const baseSpeed = vehicleType === 'vehicle' ? 45 : 4; // 45 km/h vehicle, 4 km/h walking
+    
+    // Calculate base time in hours
+    const baseTimeHours = actualDistance / baseSpeed;
+    
+    // Apply modifiers
+    const difficultyModifier = 1 + (baseDifficulty * 0.3); // Higher difficulty = slower travel
+    const squadEfficiency = Math.max(0.6, 1 - (squadLevel * 0.05)); // Better squads travel faster
+    const terrainModifier = this.getTerrainModifier(fromLocation, toLocation);
+    
+    // Final calculation in minutes
+    const totalTimeMinutes = baseTimeHours * 60 * difficultyModifier * squadEfficiency * terrainModifier;
+    
+    return Math.max(5, Math.round(totalTimeMinutes)); // Minimum 5 minutes
   }
 
-  private calculateHaversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-    const R = 6371; // Earth's radius in kilometers
+  // Calculate distance between two coordinates (Haversine formula)
+  private calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371; // Earth's radius in km
     const dLat = this.toRadians(lat2 - lat1);
     const dLng = this.toRadians(lng2 - lng1);
+    
     const a = 
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
       Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    
     return R * c;
   }
 
@@ -224,38 +75,46 @@ export class EnhancedTravelCalculator {
     return degrees * (Math.PI / 180);
   }
 
-  private generateRoutePoints(
-    from: { lat: number; lng: number },
-    to: { lat: number; lng: number }
-  ): { lat: number; lng: number }[] {
-    const points: { lat: number; lng: number }[] = [];
-    const steps = 10;
-
-    // Add some realistic waypoints to avoid straight lines
-    const midPoint = {
-      lat: (from.lat + to.lat) / 2 + (Math.random() - 0.5) * 0.01,
-      lng: (from.lng + to.lng) / 2 + (Math.random() - 0.5) * 0.01
+  // Get road factor based on location types (how much roads deviate from straight line)
+  private getRoadFactor(fromType: string, toType: string): number {
+    const factors: Record<string, number> = {
+      'settlement': 1.2,   // Good roads to settlements
+      'outpost': 1.4,      // Decent roads to outposts
+      'facility': 1.3,     // Industrial roads to facilities
+      'vault': 1.8,        // Hidden/difficult access
+      'ruins': 1.6,        // Poor road conditions
+      'landmark': 2.0      // No proper roads, rough terrain
     };
+    
+    const fromFactor = factors[fromType] || 1.5;
+    const toFactor = factors[toType] || 1.5;
+    
+    return (fromFactor + toFactor) / 2;
+  }
 
-    // Generate points from start to midpoint
-    for (let i = 0; i <= steps / 2; i++) {
-      const t = i / (steps / 2);
-      points.push({
-        lat: from.lat + (midPoint.lat - from.lat) * t,
-        lng: from.lng + (midPoint.lng - from.lng) * t
-      });
+  // Get terrain modifier based on location types and environment
+  private getTerrainModifier(fromLocation: any, toLocation: any): number {
+    let modifier = 1.0;
+    
+    // Danger level affects travel time (more dangerous = more careful = slower)
+    const avgDanger = (fromLocation.dangerLevel + toLocation.dangerLevel) / 2;
+    modifier += avgDanger * 0.1;
+    
+    // Special location modifiers
+    if (toLocation.id === 'quarry-junction' || fromLocation.id === 'quarry-junction') {
+      modifier *= 1.5; // Deathclaw territory requires extreme caution
     }
-
-    // Generate points from midpoint to end
-    for (let i = 1; i <= steps / 2; i++) {
-      const t = i / (steps / 2);
-      points.push({
-        lat: midPoint.lat + (to.lat - midPoint.lat) * t,
-        lng: midPoint.lng + (to.lng - midPoint.lng) * t
-      });
+    
+    if (toLocation.id === 'deathclaw-promontory' || fromLocation.id === 'deathclaw-promontory') {
+      modifier *= 2.0; // Extremely dangerous area
     }
-
-    return points;
+    
+    // Underground locations are harder to access
+    if (toLocation.type === 'vault' || fromLocation.type === 'vault') {
+      modifier *= 1.3;
+    }
+    
+    return modifier;
   }
 
   // Calculate travel phases for a mission

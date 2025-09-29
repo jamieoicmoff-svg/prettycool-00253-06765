@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '@/context/GameContext';
-import { Sword, Users, Target, Clock, Trophy, TriangleAlert as AlertTriangle, Star, Zap } from 'lucide-react';
+import { Sword, Users, Target, Clock, Trophy, AlertTriangle, Star, Zap } from 'lucide-react';
 import { COMBAT_TARGETS, CombatTarget } from './CombatTargets';
 import { calculateCombatStats, simulateCombat } from '@/utils/CombatCalculations';
 import { getTerrainByLocation, TERRAIN_TYPES } from '@/data/TerrainTypes';
 import { calculateUniversalCombatDuration } from '@/utils/combat/UniversalCombatFormula';
 import combatSound from '@/assets/Combat-and-operations-sound.mp3';
-import { LoreCombatMap } from '../operations/LoreCombatMap';
-import { LoreAccurateFullMap } from '../maps/LoreAccurateFullMap';
+import CombatOperationsMap from '../operations/CombatOperationsMap';
+import { FullscreenMap } from '../maps/FullscreenMap';
 
 
 export const Combat = () => {
@@ -426,8 +426,8 @@ const enhancedCombatTargets = [
       {/* Active Combat Missions */}
       {renderActiveCombatMissions()}
       
-      {/* Lore-Accurate Combat Operations Map */}
-      <LoreCombatMap
+      {/* Combat Operations Map */}
+      <CombatOperationsMap
         onSelectLocation={setSelectedLocation}
         selectedLocation={selectedLocation}
         activeCombat={ongoingCombatMissions.length > 0 ? {
@@ -439,9 +439,9 @@ const enhancedCombatTargets = [
         onMapClick={() => setShowFullMap(true)}
       />
       
-      {/* Lore-Accurate Full Map Modal */}
+      {/* Full Map Modal */}
       {showFullMap && (
-        <LoreAccurateFullMap
+        <FullscreenMap
           onClose={() => setShowFullMap(false)}
           onSelectLocation={setSelectedLocation}
           selectedLocation={selectedLocation}

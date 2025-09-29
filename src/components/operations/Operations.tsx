@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
-import { Radio, Clock, MapPin, Users, Star, ChevronRight, TriangleAlert as AlertTriangle, Target, Crosshair } from 'lucide-react';
+import { Radio, Clock, MapPin, Users, Star, ChevronRight, AlertTriangle, Target, Crosshair } from 'lucide-react';
 import { SANDY_SHORES_QUESTLINE } from '@/data/SandyShoresQuests';
-import { LoreMissionTrackingMap } from './LoreMissionTrackingMap';
-import { LoreFullMissionMap } from './LoreFullMissionMap';
-import { getFalloutLocationById } from '@/data/FalloutLocations';
+import MissionTrackingMap from './MissionTrackingMap';
+import FullMissionMap from './FullMissionMap';
+import { getLocationById } from '@/data/MojaveLocations';
 
 export const Operations = () => {
   const { gameState, startMission, handleEventChoice, addNotification } = useGame();
@@ -142,8 +142,8 @@ export const Operations = () => {
     const totalDuration = mission.duration * 60000;
     const progress = Math.min(100, (elapsed / totalDuration) * 100);
     
-    const destination = getFalloutLocationById(mission.location);
-    const baseLocation = getFalloutLocationById('shady-sands')!;
+    const destination = getLocationById(mission.location);
+    const baseLocation = getLocationById('shady-sands')!;
     
     if (destination) {
       const progressFactor = progress / 100;
@@ -151,7 +151,7 @@ export const Operations = () => {
       const currentY = baseLocation.coordinates.y + (destination.coordinates.y - baseLocation.coordinates.y) * progressFactor;
       return { x: currentX, y: currentY };
     }
-    return { x: 15, y: 75 }; // Shady Sands coordinates
+    return { x: 15, y: 65 };
   };
 
   const getMissionProgress = (mission: any) => {
@@ -229,7 +229,7 @@ export const Operations = () => {
                 </div>
                 
                 {/* Live Mission Tracking Map */}
-                <LoreMissionTrackingMap 
+                <MissionTrackingMap 
                   mission={mission} 
                   onMapClick={() => openFullMap(mission)}
                 />
@@ -433,7 +433,7 @@ export const Operations = () => {
       
       {/* Full Screen Mission Map */}
       {showFullMap && fullMapMission && (
-        <LoreFullMissionMap
+        <FullMissionMap
           mission={fullMapMission}
           onClose={() => setShowFullMap(false)}
           squadPosition={getSquadPosition(fullMapMission)}
