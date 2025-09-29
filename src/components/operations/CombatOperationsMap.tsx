@@ -102,8 +102,18 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
             selectedLocationId={selectedLocation}
             showSquadPosition={!!activeCombat}
             squadProgress={progress}
-          />
-        </div>
+        />
+      </div>
+
+      <FullscreenCaliforniaMap
+        isOpen={isFullscreenOpen}
+        onClose={() => setIsFullscreenOpen(false)}
+        currentMission={activeMission}
+        onLocationSelect={onLocationSelect}
+        selectedLocationId={selectedLocation}
+        showSquadPosition={!!activeMission}
+        squadProgress={progress}
+      />
         
         {/* Selected Location Details */}
         {selectedLocation && (

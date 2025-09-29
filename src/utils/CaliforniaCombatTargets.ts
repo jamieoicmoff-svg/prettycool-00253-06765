@@ -308,9 +308,14 @@ function getLootPoolForFaction(faction: string, difficulty: number): string[] {
   return pool;
 }
 
-// Get combat targets within a specific distance range
+// Get combat targets within a specific distance range (from Shady Sands)
 export function getCombatTargetsByDistance(minDistance: number, maxDistance: number): CombatTarget[] {
-  const combatLocations = getCombatLocationsInRange(minDistance, maxDistance);
+  const shadySands = CALIFORNIA_LOCATIONS.find(loc => loc.id === 'shady-sands');
+  if (!shadySands) return [];
+  
+  const combatLocations = getCombatLocationsInRange(shadySands, maxDistance).filter(
+    loc => loc.distanceFromShadySands >= minDistance
+  );
   return combatLocations.map(location => createTargetFromLocation(location));
 }
 

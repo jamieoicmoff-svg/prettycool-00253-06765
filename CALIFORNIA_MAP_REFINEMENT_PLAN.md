@@ -16,23 +16,27 @@
 ### Solution
 
 **Embedded/Minimap Mode** (Operations panel):
-- Dimensions: 1000w x 600h (shorter, wider view)
-- ViewBox: `0 0 1000 600`
+- Dimensions: 1000w x 500h (shorter, wider view)
+- ViewBox: `0 0 1000 500`
 - Remove top padding to prevent UI overlap
 - Crop to show only central California region
 - Hide title/legend (parent provides context)
 
 **Fullscreen Mode**:
-- Dimensions: 1600w x 1200h (MUCH larger, more spread out)
-- ViewBox: `0 0 1600 1200` 
+- Dimensions: 2000w x 1800h (MUCH larger, highly detailed)
+- ViewBox: `0 0 2000 1800` 
+- Show entire California + eastern Nevada border
+- Full title, legend, and controls visible
+- Locations much more spread out (realistic distances)
+- Grid overlay with 50-mile markers
 - Show entire California + eastern Nevada border
 - Full title, legend, and controls visible
 - Locations much more spread out (realistic distances)
 - Grid overlay with 50-mile markers
 
 **Key Changes**:
-- Embedded locations use coordinates 0-100% mapped to 1000x600
-- Fullscreen locations use SAME percentages but mapped to 1600x1200 (appears more spread out)
+- Embedded locations use coordinates 0-100% mapped to 1000x500
+- Fullscreen locations use SAME percentages but mapped to 2000x1800 (appears more spread out)
 - This makes fullscreen feel expansive while keeping data consistent
 
 ---
@@ -640,8 +644,8 @@ Shows panel with:
 
 ## 13. KEY METRICS
 
-- **Map Dimensions (Embedded)**: 1000w x 600h
-- **Map Dimensions (Fullscreen)**: 1600w x 1200h
+- **Map Dimensions (Embedded)**: 1000w x 500h
+- **Map Dimensions (Fullscreen)**: 2000w x 1800h
 - **Zoom Range**: 1x to 4x
 - **Discovery Radius**: 40 miles from Player Settlement
 - **Local Combat Zones**: 10 unique locations

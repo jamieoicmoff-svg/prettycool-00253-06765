@@ -40,6 +40,26 @@ export const RoadRenderer: React.FC<RoadRendererProps> = ({
     return baseWidth;
   };
 
+  // Create path with Bezier curves
+  const createRoadPath = (fromPos: {x: number; y: number}, toPos: {x: number; y: number}, curvePoints?: {x: number; y: number}[]) => {
+    if (!curvePoints || curvePoints.length === 0) {
+      // Straight line
+      return `M ${fromPos.x},${fromPos.y} L ${toPos.x},${toPos.y}`;
+    }
+    
+    // Bezier curve with control points
+    if (curvePoints.length === 1) {
+      const cp = coordToPixel(curvePoints[0]);
+      return `M ${fromPos.x},${fromPos.y} Q ${cp.x},${cp.y} ${toPos.x},${toPos.y}`;
+    } else if (curvePoints.length === 2) {
+      const cp1 = coordToPixel(curvePoints[0]);
+      const cp2 = coordToPixel(curvePoints[1]);
+      return `M ${fromPos.x},${fromPos.y} C ${cp1.x},${cp1.y} ${cp2.x},${cp2.y} ${toPos.x},${toPos.y}`;
+    }
+    
+    return `M ${fromPos.x},${fromPos.y} L ${toPos.x},${toPos.y}`;
+  };
+
   return (
     <g className="roads-layer">
       {roads.map(road => {
@@ -55,32 +75,30 @@ export const RoadRenderer: React.FC<RoadRendererProps> = ({
         const isHovered = hoveredRoadId === road.id;
         const color = getRoadColor(road, isActive, isHovered);
         const width = getRoadWidth(road.roadType, isActive, isHovered);
+        
+        const pathData = createRoadPath(fromPos, toPos, road.curveControlPoints);
 
         return (
           <g key={road.id}>
             {/* Glow effect for active/hovered roads */}
             {(isActive || isHovered) && (
-              <line
-                x1={fromPos.x}
-                y1={fromPos.y}
-                x2={toPos.x}
-                y2={toPos.y}
+              <path
+                d={pathData}
                 stroke={color}
                 strokeWidth={width + 6}
+                fill="none"
                 opacity="0.3"
                 className="pointer-events-none"
               />
             )}
 
-            {/* Main road line */}
-            <line
-              x1={fromPos.x}
-              y1={fromPos.y}
-              x2={toPos.x}
-              y2={toPos.y}
+            {/* Main road path */}
+            <path
+              d={pathData}
               stroke={color}
               strokeWidth={width}
               strokeLinecap="round"
+              fill="none"
               opacity={isActive ? 1 : 0.7}
               className="cursor-pointer transition-all duration-200"
               onMouseEnter={() => onRoadHover(road.id)}
@@ -89,28 +107,24 @@ export const RoadRenderer: React.FC<RoadRendererProps> = ({
 
             {/* Road dashes for damaged/dangerous roads */}
             {road.condition !== 'good' && !isActive && (
-              <line
-                x1={fromPos.x}
-                y1={fromPos.y}
-                x2={toPos.x}
-                y2={toPos.y}
+              <path
+                d={pathData}
                 stroke="#1a1a1a"
                 strokeWidth={width * 0.3}
                 strokeDasharray={road.condition === 'damaged' ? '5,5' : '3,3'}
                 strokeLinecap="round"
+                fill="none"
                 className="pointer-events-none"
               />
             )}
 
             {/* Invisible wider hitbox for easier hovering */}
-            <line
-              x1={fromPos.x}
-              y1={fromPos.y}
-              x2={toPos.x}
-              y2={toPos.y}
+            <path
+              d={pathData}
               stroke="transparent"
               strokeWidth={Math.max(width + 10, 15)}
               strokeLinecap="round"
+              fill="none"
               className="cursor-pointer"
               onMouseEnter={() => onRoadHover(road.id)}
               onMouseLeave={() => onRoadHover(null)}

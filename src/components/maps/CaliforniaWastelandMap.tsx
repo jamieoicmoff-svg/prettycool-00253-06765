@@ -22,9 +22,9 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
   const [hoveredLocation, setHoveredLocation] = useState<string | null>(null);
   const [hoveredRoad, setHoveredRoad] = useState<string | null>(null);
 
-  // Map dimensions (500 miles x 500 miles)
+  // Map dimensions (embedded: 1000x500, fullscreen: 2000x1800)
   const mapWidth = 1000;
-  const mapHeight = 1000;
+  const mapHeight = 500;
 
   // Convert percentage coordinates to pixel positions
   const coordToPixel = (coord: { x: number; y: number }) => ({
@@ -85,32 +85,9 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
 
   return (
     <div className="relative w-full h-full bg-[#1a1a1a] rounded-lg overflow-hidden border border-border">
-      {/* Map Title */}
-      <div className="absolute top-4 left-4 z-10 bg-background/90 backdrop-blur-sm px-4 py-2 rounded-lg border border-border">
-        <h3 className="text-lg font-bold text-foreground">California Wasteland</h3>
-        <p className="text-sm text-muted-foreground">NCR Territory - 500 Mile Radius</p>
-      </div>
-
-      {/* Map Legend */}
-      <div className="absolute top-4 right-4 z-10 bg-background/90 backdrop-blur-sm px-4 py-2 rounded-lg border border-border">
-        <div className="space-y-1 text-xs">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-            <span className="text-foreground">Shady Sands (NCR Capital)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <span className="text-foreground">Your Outpost</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-            <span className="text-foreground">Settlement</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-            <span className="text-foreground">Combat Zone</span>
-          </div>
-        </div>
+      {/* Click to expand hint */}
+      <div className="absolute bottom-4 right-4 z-10 bg-background/90 backdrop-blur-sm px-3 py-1 rounded-lg border border-border">
+        <p className="text-xs text-muted-foreground">Click map to expand</p>
       </div>
 
       {/* SVG Map */}

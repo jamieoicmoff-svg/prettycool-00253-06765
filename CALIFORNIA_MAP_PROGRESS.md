@@ -133,13 +133,13 @@ None yet - implementation just started.
 
 ## NEW REFINEMENT PLAN - Phase Overview
 
-### Phase 1: Core Data Updates ⏳ NOT STARTED
-- [ ] Update CaliforniaLocations.ts with real California geographic positions
-- [ ] Add 10 unique local combat zones near Player Settlement
-- [ ] Add pre-war buildings and faction control data
-- [ ] Rewrite CaliforniaRoads.ts based on real California highways (I-5, I-15, I-80, etc.)
-- [ ] Add Bezier curve control points for realistic road shapes
-- [ ] Update GameTypes.ts with discovery fields
+### Phase 1: Core Data Updates ✅ COMPLETE
+- [x] Update CaliforniaLocations.ts with real California geographic positions
+- [x] Add 10 unique local combat zones near Player Settlement
+- [x] Add pre-war buildings and faction control data
+- [x] Rewrite CaliforniaRoads.ts based on real California highways (I-5, I-15, I-80, etc.)
+- [x] Add Bezier curve control points for realistic road shapes
+- [x] Update with discovery fields
 
 ### Phase 2: Discovery System ⏳ NOT STARTED
 - [ ] Create LocationDiscoverySystem.ts (fog of war)
@@ -148,21 +148,22 @@ None yet - implementation just started.
 - [ ] Initialize with Player Settlement + nearby locations visible
 - [ ] Major cities (Shady Sands, New Vegas) start undiscovered
 
-### Phase 3: Map Visual Updates ⏳ NOT STARTED
-- [ ] Update CaliforniaWastelandMap.tsx dimensions (1000x600 embedded, 1600x1200 fullscreen)
-- [ ] Add embedded/fullscreen mode toggle
-- [ ] Filter locations by discovery status
-- [ ] Add "click to expand" functionality
-- [ ] Update RoadRenderer.tsx to use Bezier curves
-- [ ] Add interactive click handlers for roads
+### Phase 3: Map Visual Updates ✅ COMPLETE
+- [x] Update CaliforniaWastelandMap.tsx dimensions (1000x500 embedded, 2000x1800 fullscreen)
+- [x] Add embedded/fullscreen mode support
+- [x] Filter locations by discovery status
+- [x] Add "click to expand" functionality
+- [x] Update RoadRenderer.tsx to use Bezier curves
+- [x] Add interactive click handlers for roads
 
-### Phase 4: Fullscreen Mode ⏳ NOT STARTED
-- [ ] Create FullscreenCaliforniaMap.tsx component
-- [ ] Implement zoom controls (1x-4x range)
-- [ ] Implement pan controls (drag, WASD keys)
-- [ ] Add mobile touch controls (pinch zoom, drag pan)
-- [ ] Add keyboard shortcuts (ESC to close, +/- to zoom)
-- [ ] Smooth transitions and animations
+### Phase 4: Fullscreen Mode ✅ COMPLETE
+- [x] Create FullscreenCaliforniaMap.tsx component
+- [x] Implement zoom controls (1x-4x range)
+- [x] Implement pan controls (drag, WASD keys)
+- [x] Add mobile touch controls (pinch zoom, drag pan)
+- [x] Add keyboard shortcuts (ESC to close, +/- to zoom)
+- [x] Smooth transitions and animations
+- [x] Added fullscreen button to CombatOperationsMap
 
 ### Phase 5: Info Panels ⏳ NOT STARTED
 - [ ] Create LocationInfoPanel.tsx (detailed location info)
