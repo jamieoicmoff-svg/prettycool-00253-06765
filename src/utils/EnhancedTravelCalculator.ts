@@ -1,4 +1,4 @@
-import { ENHANCED_MOJAVE_LOCATIONS, getLocationByIdEnhanced } from '@/components/maps/GoogleMapsConfig';
+import { MOJAVE_LOCATIONS, getLocationById } from '@/data/MojaveLocations';
 
 // Enhanced travel time calculation using Google Maps-style routing
 export class EnhancedTravelCalculator {
@@ -19,19 +19,19 @@ export class EnhancedTravelCalculator {
     squadLevel: number = 1,
     vehicleType: 'foot' | 'vehicle' = 'foot'
   ): number {
-    const fromLocation = getLocationByIdEnhanced(fromLocationId);
-    const toLocation = getLocationByIdEnhanced(toLocationId);
+    const fromLocation = getLocationById(fromLocationId);
+    const toLocation = getLocationById(toLocationId);
     
     if (!fromLocation || !toLocation) {
       return 30; // Default 30 minutes
     }
 
-    // Calculate straight-line distance first
+    // Calculate straight-line distance (using x,y percentage coordinates)
     const straightLineDistance = this.calculateDistance(
-      fromLocation.coordinates.lat,
-      fromLocation.coordinates.lng,
-      toLocation.coordinates.lat,
-      toLocation.coordinates.lng
+      fromLocation.coordinates.x,
+      fromLocation.coordinates.y,
+      toLocation.coordinates.x,
+      toLocation.coordinates.y
     );
 
     // Apply road factor (roads aren't straight lines)
@@ -55,24 +55,17 @@ export class EnhancedTravelCalculator {
     return Math.max(5, Math.round(totalTimeMinutes)); // Minimum 5 minutes
   }
 
-  // Calculate distance between two coordinates (Haversine formula)
-  private calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-    const R = 6371; // Earth's radius in km
-    const dLat = this.toRadians(lat2 - lat1);
-    const dLng = this.toRadians(lng2 - lng1);
+  // Calculate distance between two coordinates (using x,y percentage coordinates)
+  // We convert percentage-based map coordinates to approximate real-world distance
+  private calculateDistance(x1: number, y1: number, x2: number, y2: number): number {
+    // Euclidean distance for x,y coordinates
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const percentageDistance = Math.sqrt(dx * dx + dy * dy);
     
-    const a = 
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
-      Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    
-    return R * c;
-  }
-
-  private toRadians(degrees: number): number {
-    return degrees * (Math.PI / 180);
+    // Convert to approximate km (Mojave Wasteland is roughly 500km across)
+    // 100% of the map = ~500km
+    return (percentageDistance / 100) * 500;
   }
 
   // Get road factor based on location types (how much roads deviate from straight line)
