@@ -120,8 +120,10 @@ export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = (
   });
 
   // Get location marker size
-  const getMarkerSize = (type: CaliforniaLocation['type']) => {
-    switch (type) {
+  const getMarkerSize = (location: CaliforniaLocation) => {
+    if (location.id === 'player-outpost') return 18;
+    
+    switch (location.type) {
       case 'settlement': return 16;
       case 'vault': return 14;
       case 'facility': return 14;
@@ -133,9 +135,9 @@ export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = (
 
   // Get marker color
   const getMarkerColor = (location: CaliforniaLocation) => {
+    if (location.id === 'player-outpost') return '#10b981'; // Bright green for player
     if (location.id === selectedLocationId) return '#fbbf24';
     if (location.id === 'shady-sands') return '#3b82f6';
-    if (location.id === 'player-outpost') return '#10b981';
     
     if (!location.discovered) return '#6b7280'; // Gray for undiscovered
     
@@ -271,21 +273,22 @@ export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = (
               {/* Locations */}
               {CALIFORNIA_LOCATIONS.map(location => {
                 const pos = coordToPixel(location.coordinates);
-                const size = getMarkerSize(location.type);
+                const size = getMarkerSize(location);
                 const color = getMarkerColor(location);
                 const isHovered = hoveredLocation === location.id;
                 const isSelected = selectedLocationId === location.id;
+                const isPlayerOutpost = location.id === 'player-outpost';
 
                 return (
                   <g key={location.id}>
                     {/* Glow effect */}
-                    {(isHovered || isSelected) && (
+                    {(isHovered || isSelected || isPlayerOutpost) && (
                       <circle
                         cx={pos.x}
                         cy={pos.y}
                         r={size + 12}
                         fill={color}
-                        opacity="0.3"
+                        opacity={isPlayerOutpost ? "0.5" : "0.3"}
                         className="animate-pulse"
                       />
                     )}
@@ -307,16 +310,16 @@ export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = (
                       onClick={() => location.discovered && onLocationSelect?.(location)}
                     />
 
-                    {/* Location label */}
-                    {(isHovered || isSelected || location.discovered) && (
+                    {/* Location label - always show for player outpost */}
+                    {(isHovered || isSelected || isPlayerOutpost || location.discovered) && (
                       <text
                         x={pos.x}
                         y={pos.y - size - 10}
                         textAnchor="middle"
-                        className="fill-foreground text-sm font-semibold pointer-events-none"
+                        className="fill-foreground text-sm font-bold pointer-events-none"
                         style={{ 
-                          textShadow: '0 0 4px #000, 0 0 4px #000',
-                          fontSize: location.id === 'shady-sands' ? '18px' : '14px'
+                          textShadow: '0 0 4px #000, 0 0 8px #000',
+                          fontSize: isPlayerOutpost ? '20px' : location.id === 'shady-sands' ? '18px' : '14px'
                         }}
                       >
                         {location.discovered ? location.name : '???'}

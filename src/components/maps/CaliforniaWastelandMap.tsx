@@ -32,9 +32,11 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
     y: (coord.y / 100) * mapHeight
   });
 
-  // Get location marker size based on type
-  const getMarkerSize = (type: CaliforniaLocation['type']) => {
-    switch (type) {
+  // Get location marker size based on location (not just type)
+  const getMarkerSize = (location: CaliforniaLocation) => {
+    if (location.id === 'player-outpost') return 14; // Larger for player outpost
+    
+    switch (location.type) {
       case 'settlement': return 12;
       case 'vault': return 10;
       case 'facility': return 10;
@@ -46,9 +48,9 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
 
   // Get marker color based on type and danger level
   const getMarkerColor = (location: CaliforniaLocation) => {
+    if (location.id === 'player-outpost') return '#10b981'; // Bright green for player outpost
     if (location.id === selectedLocationId) return '#fbbf24'; // amber-400
     if (location.id === 'shady-sands') return '#3b82f6'; // blue-500
-    if (location.id === 'player-outpost') return '#10b981'; // green-500
     
     switch (location.type) {
       case 'settlement': return '#8b5cf6'; // purple-500
@@ -92,7 +94,7 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
 
       {/* SVG Map */}
       <svg 
-        viewBox={`0 0 ${mapWidth} ${mapHeight}`}
+        viewBox="200 250 600 350"
         className="w-full h-full"
         style={{ background: '#1a1a1a' }}
       >
@@ -117,21 +119,22 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
         {/* Render locations */}
         {CALIFORNIA_LOCATIONS.map(location => {
           const pos = coordToPixel(location.coordinates);
-          const size = getMarkerSize(location.type);
+          const size = getMarkerSize(location);
           const color = getMarkerColor(location);
           const isHovered = hoveredLocation === location.id;
           const isSelected = selectedLocationId === location.id;
+          const isPlayerOutpost = location.id === 'player-outpost';
 
           return (
             <g key={location.id}>
-              {/* Glow effect for hovered/selected */}
-              {(isHovered || isSelected) && (
+              {/* Glow effect for hovered/selected/player outpost */}
+              {(isHovered || isSelected || isPlayerOutpost) && (
                 <circle
                   cx={pos.x}
                   cy={pos.y}
-                  r={size + 8}
+                  r={size + (isPlayerOutpost ? 10 : 8)}
                   fill={color}
-                  opacity="0.3"
+                  opacity={isPlayerOutpost ? "0.5" : "0.3"}
                   className="animate-pulse"
                 />
               )}
@@ -155,16 +158,16 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
                 onClick={() => onLocationSelect?.(location)}
               />
 
-              {/* Location label */}
-              {(isHovered || isSelected || location.type === 'settlement' || location.id === 'shady-sands' || location.id === 'player-outpost') && (
+              {/* Location label - always show for player outpost and major locations */}
+              {(isHovered || isSelected || isPlayerOutpost || location.type === 'settlement' || location.id === 'shady-sands') && (
                 <text
                   x={pos.x}
                   y={pos.y - size - 8}
                   textAnchor="middle"
-                  className="fill-foreground text-xs font-semibold pointer-events-none"
+                  className="fill-foreground text-xs font-bold pointer-events-none"
                   style={{ 
-                    textShadow: '0 0 4px #000, 0 0 4px #000',
-                    fontSize: location.id === 'shady-sands' ? '14px' : '12px'
+                    textShadow: '0 0 4px #000, 0 0 8px #000',
+                    fontSize: isPlayerOutpost ? '14px' : location.id === 'shady-sands' ? '14px' : '12px'
                   }}
                 >
                   {location.name}
