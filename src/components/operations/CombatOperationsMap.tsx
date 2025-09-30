@@ -3,6 +3,7 @@ import { MapPin, Clock, Users, Route, Eye, Crosshair } from 'lucide-react';
 import { CALIFORNIA_LOCATIONS, getCaliforniaLocationById } from '@/data/CaliforniaLocations';
 import { CombatTarget } from '@/components/combat/CombatTargets';
 import { CaliforniaWastelandMap } from '@/components/maps/CaliforniaWastelandMap';
+import { FullscreenCaliforniaMap } from '@/components/maps/FullscreenCaliforniaMap';
 
 interface CombatOperationsMapProps {
   onSelectLocation: (locationId: string) => void;
@@ -24,6 +25,7 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
 }) => {
   const [progress, setProgress] = useState(0);
   const [currentPhase, setCurrentPhase] = useState<'travel' | 'setup' | 'combat' | 'return'>('travel');
+  const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
   
   useEffect(() => {
     if (!activeCombat) return;
@@ -96,7 +98,7 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
         )}
         
         {/* California Wasteland Map */}
-        <div className="h-[500px]">
+        <div className="h-[500px] cursor-pointer" onClick={() => setIsFullscreenOpen(true)}>
           <CaliforniaWastelandMap
             onLocationSelect={(location) => onSelectLocation(location.id)}
             selectedLocationId={selectedLocation}
@@ -108,10 +110,9 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
       <FullscreenCaliforniaMap
         isOpen={isFullscreenOpen}
         onClose={() => setIsFullscreenOpen(false)}
-        currentMission={activeMission}
-        onLocationSelect={onLocationSelect}
+        onLocationSelect={(location) => onSelectLocation(location.id)}
         selectedLocationId={selectedLocation}
-        showSquadPosition={!!activeMission}
+        showSquadPosition={!!activeCombat}
         squadProgress={progress}
       />
         
