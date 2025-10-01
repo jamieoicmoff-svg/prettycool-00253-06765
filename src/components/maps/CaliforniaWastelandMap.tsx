@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { CALIFORNIA_LOCATIONS, CaliforniaLocation } from '@/data/CaliforniaLocations';
 import { CALIFORNIA_ROADS } from '@/data/CaliforniaRoads';
 import { RoadRenderer } from './RoadRenderer';
@@ -10,6 +10,7 @@ interface CaliforniaWastelandMapProps {
   selectedLocationId?: string;
   showSquadPosition?: boolean;
   squadProgress?: number; // 0-100% of mission progress
+  className?: string;
 }
 
 export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
@@ -17,32 +18,23 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
   onLocationSelect,
   selectedLocationId,
   showSquadPosition = false,
-  squadProgress = 0
+  squadProgress = 0,
+  className = ''
 }) => {
   const [hoveredLocation, setHoveredLocation] = useState<string | null>(null);
   const [hoveredRoad, setHoveredRoad] = useState<string | null>(null);
 
-  // Map dimensions (embedded: 1000x500, fullscreen: 2000x1800)
-  const mapWidth = 1000;
-  const mapHeight = 500;
-
-  // Convert percentage coordinates to pixel positions
-  const coordToPixel = (coord: { x: number; y: number }) => ({
-    x: (coord.x / 100) * mapWidth,
-    y: (coord.y / 100) * mapHeight
-  });
-
-  // Get location marker size based on location (not just type)
+  // Get location marker size based on location type
   const getMarkerSize = (location: CaliforniaLocation) => {
-    if (location.id === 'player-outpost') return 14; // Larger for player outpost
+    if (location.id === 'player-outpost') return 1.4; // Larger for player outpost
     
     switch (location.type) {
-      case 'settlement': return 12;
-      case 'vault': return 10;
-      case 'facility': return 10;
-      case 'combat': return 8;
-      case 'outpost': return 10;
-      default: return 8;
+      case 'settlement': return 1.2;
+      case 'vault': return 1.0;
+      case 'facility': return 1.0;
+      case 'combat': return 0.8;
+      case 'outpost': return 1.0;
+      default: return 0.8;
     }
   };
 
@@ -72,8 +64,8 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
     
     if (!playerOutpost || !destination) return null;
     
-    const startPos = coordToPixel(playerOutpost.coordinates);
-    const endPos = coordToPixel(destination.coordinates);
+    const startPos = playerOutpost.coordinates;
+    const endPos = destination.coordinates;
     
     const progress = squadProgress / 100;
     
@@ -86,31 +78,41 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
   const squadPos = getSquadPosition();
 
   return (
-    <div className="relative w-full h-full bg-[#1a1a1a] rounded-lg overflow-hidden border border-border">
+    <div className={`relative w-full h-full bg-[#1a1a1a] rounded-lg overflow-hidden border border-border ${className}`}>
       {/* Click to expand hint */}
       <div className="absolute bottom-4 right-4 z-10 bg-background/90 backdrop-blur-sm px-3 py-1 rounded-lg border border-border">
         <p className="text-xs text-muted-foreground">Click map to expand</p>
       </div>
 
-      {/* SVG Map */}
+      {/* SVG Map - Full California (800mi N-S × 400mi E-W) */}
       <svg 
-        viewBox="200 250 600 350"
+        viewBox="0 0 100 100"
         className="w-full h-full"
         style={{ background: '#1a1a1a' }}
+        preserveAspectRatio="xMidYMid meet"
       >
         {/* Grid lines for reference */}
         <defs>
-          <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
-            <path d="M 100 0 L 0 0 0 100" fill="none" stroke="#2a2a2a" strokeWidth="0.5"/>
+          <pattern id="grid-minimap" width="10" height="10" patternUnits="userSpaceOnUse">
+            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#2a2a2a" strokeWidth="0.1"/>
           </pattern>
+          
+          {/* Glow effects */}
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="0.5" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
         </defs>
-        <rect width={mapWidth} height={mapHeight} fill="url(#grid)" />
+        
+        <rect width="100" height="100" fill="url(#grid-minimap)" />
 
         {/* Render roads */}
         <RoadRenderer 
           roads={CALIFORNIA_ROADS}
           locations={CALIFORNIA_LOCATIONS}
-          coordToPixel={coordToPixel}
           activeRoute={[]}
           hoveredRoadId={hoveredRoad}
           onRoadHover={setHoveredRoad}
@@ -118,24 +120,26 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
 
         {/* Render locations */}
         {CALIFORNIA_LOCATIONS.map(location => {
-          const pos = coordToPixel(location.coordinates);
+          const pos = location.coordinates;
           const size = getMarkerSize(location);
           const color = getMarkerColor(location);
           const isHovered = hoveredLocation === location.id;
           const isSelected = selectedLocationId === location.id;
           const isPlayerOutpost = location.id === 'player-outpost';
+          const isShadySands = location.id === 'shady-sands';
 
           return (
             <g key={location.id}>
-              {/* Glow effect for hovered/selected/player outpost */}
-              {(isHovered || isSelected || isPlayerOutpost) && (
+              {/* Glow effect for important locations */}
+              {(isHovered || isSelected || isPlayerOutpost || isShadySands) && (
                 <circle
                   cx={pos.x}
                   cy={pos.y}
-                  r={size + (isPlayerOutpost ? 10 : 8)}
+                  r={size + (isPlayerOutpost ? 1.5 : 1)}
                   fill={color}
                   opacity={isPlayerOutpost ? "0.5" : "0.3"}
                   className="animate-pulse"
+                  filter="url(#glow)"
                 />
               )}
 
@@ -146,28 +150,28 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
                 r={size}
                 fill={color}
                 stroke="#ffffff"
-                strokeWidth="2"
+                strokeWidth="0.2"
                 className="cursor-pointer transition-all duration-200"
                 style={{
                   filter: isHovered ? 'brightness(1.5)' : 'none',
                   transform: isHovered ? 'scale(1.2)' : 'scale(1)',
-                  transformOrigin: `${pos.x}px ${pos.y}px`
+                  transformOrigin: `${pos.x}% ${pos.y}%`
                 }}
                 onMouseEnter={() => setHoveredLocation(location.id)}
                 onMouseLeave={() => setHoveredLocation(null)}
                 onClick={() => onLocationSelect?.(location)}
               />
 
-              {/* Location label - always show for player outpost and major locations */}
-              {(isHovered || isSelected || isPlayerOutpost || location.type === 'settlement' || location.id === 'shady-sands') && (
+              {/* Location label - show for important locations */}
+              {(isHovered || isSelected || isPlayerOutpost || isShadySands || location.type === 'settlement') && (
                 <text
                   x={pos.x}
-                  y={pos.y - size - 8}
+                  y={pos.y - size - 1.5}
                   textAnchor="middle"
-                  className="fill-foreground text-xs font-bold pointer-events-none"
+                  className="fill-foreground text-[1.2px] font-bold pointer-events-none"
                   style={{ 
-                    textShadow: '0 0 4px #000, 0 0 8px #000',
-                    fontSize: isPlayerOutpost ? '14px' : location.id === 'shady-sands' ? '14px' : '12px'
+                    textShadow: '0 0 2px #000, 0 0 4px #000',
+                    fontSize: isPlayerOutpost || isShadySands ? '1.4px' : '1.2px'
                   }}
                 >
                   {location.name}
@@ -178,10 +182,10 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
               {isHovered && (
                 <text
                   x={pos.x}
-                  y={pos.y + size + 18}
+                  y={pos.y + size + 2.5}
                   textAnchor="middle"
-                  className="fill-muted-foreground text-xs pointer-events-none"
-                  style={{ textShadow: '0 0 4px #000' }}
+                  className="fill-muted-foreground text-[1px] pointer-events-none"
+                  style={{ textShadow: '0 0 2px #000' }}
                 >
                   {location.distanceFromShadySands} mi | Danger: {location.dangerLevel}/10
                 </text>
@@ -196,7 +200,7 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
             <circle
               cx={squadPos.x}
               cy={squadPos.y}
-              r="12"
+              r="1.5"
               fill="#10b981"
               opacity="0.3"
               className="animate-pulse"
@@ -204,17 +208,17 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
             <circle
               cx={squadPos.x}
               cy={squadPos.y}
-              r="8"
+              r="1"
               fill="#10b981"
               stroke="#ffffff"
-              strokeWidth="2"
+              strokeWidth="0.2"
             />
             <text
               x={squadPos.x}
-              y={squadPos.y - 18}
+              y={squadPos.y - 2.5}
               textAnchor="middle"
-              className="fill-green-400 text-xs font-bold pointer-events-none"
-              style={{ textShadow: '0 0 4px #000' }}
+              className="fill-green-400 text-[1.2px] font-bold pointer-events-none"
+              style={{ textShadow: '0 0 2px #000' }}
             >
               YOUR SQUAD
             </text>
