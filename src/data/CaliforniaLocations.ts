@@ -27,7 +27,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     id: 'shady-sands',
     name: 'Shady Sands',
     type: 'settlement',
-    coordinates: { x: 32, y: 65 }, // Central California (Bakersfield area)
+    coordinates: { x: 40, y: 55 }, // Central California (Bakersfield area)
     distanceFromShadySands: 0,
     dangerLevel: 1,
     terrain: 'urban',
@@ -42,9 +42,9 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
 
   {
     id: 'player-outpost',
-    name: 'Outpost Sentinel',
+    name: 'Home Settlement',
     type: 'outpost',
-    coordinates: { x: 26, y: 70 }, // 50 miles SW of Shady Sands
+    coordinates: { x: 30, y: 63 }, // 50 miles SW of Shady Sands
     distanceFromShadySands: 50,
     dangerLevel: 2,
     terrain: 'wasteland',
@@ -61,7 +61,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     id: 'new-vegas',
     name: 'New Vegas',
     type: 'settlement',
-    coordinates: { x: 88, y: 58 }, // Far east (Las Vegas, Nevada)
+    coordinates: { x: 85, y: 52 }, // Far east (Las Vegas, Nevada)
     distanceFromShadySands: 220,
     dangerLevel: 5,
     terrain: 'urban',
@@ -78,7 +78,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     id: 'boneyard',
     name: 'The Boneyard',
     type: 'settlement',
-    coordinates: { x: 28, y: 78 }, // Los Angeles area
+    coordinates: { x: 36, y: 70 }, // Los Angeles area
     distanceFromShadySands: 110,
     dangerLevel: 6,
     terrain: 'ruins',
@@ -231,7 +231,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     id: 'san-francisco',
     name: 'San Francisco',
     type: 'settlement',
-    coordinates: { x: 15, y: 42 }, // SF Bay Area
+    coordinates: { x: 22, y: 32 }, // SF Bay Area
     distanceFromShadySands: 185,
     dangerLevel: 6,
     terrain: 'urban',
@@ -549,6 +549,6 @@ export const getCombatLocationsInRange = (centerLoc: CaliforniaLocation, maxDist
 export const calculateLocationDistance = (loc1: CaliforniaLocation, loc2: CaliforniaLocation): number => {
   const dx = loc2.coordinates.x - loc1.coordinates.x;
   const dy = loc2.coordinates.y - loc1.coordinates.y;
-  // Rough estimate: each 1% on map ≈ 5 miles (500-mile map)
-  return Math.sqrt(dx * dx + dy * dy) * 5;
+  // New scale: each 1% on map ≈ 2.5 miles (250-mile map)
+  return Math.sqrt(dx * dx + dy * dy) * 2.5;
 };

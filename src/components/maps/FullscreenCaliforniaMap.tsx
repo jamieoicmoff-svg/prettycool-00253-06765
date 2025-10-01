@@ -6,6 +6,7 @@ import { CALIFORNIA_LOCATIONS, CaliforniaLocation } from '@/data/CaliforniaLocat
 import { CALIFORNIA_ROADS } from '@/data/CaliforniaRoads';
 import { RoadRenderer } from './RoadRenderer';
 import { Mission } from '@/types/GameTypes';
+import { getVisibleLocations } from '@/utils/LocationDiscoverySystem';
 
 interface FullscreenCaliforniaMapProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface FullscreenCaliforniaMapProps {
   selectedLocationId?: string;
   showSquadPosition?: boolean;
   squadProgress?: number;
+  discoveredLocationIds?: string[];
 }
 
 export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = ({
@@ -24,7 +26,8 @@ export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = (
   onLocationSelect,
   selectedLocationId,
   showSquadPosition = false,
-  squadProgress = 0
+  squadProgress = 0,
+  discoveredLocationIds = []
 }) => {
   const [zoom, setZoom] = useState(1);
   const [panX, setPanX] = useState(0);
@@ -34,6 +37,9 @@ export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = (
   const [hoveredLocation, setHoveredLocation] = useState<string | null>(null);
   const [hoveredRoad, setHoveredRoad] = useState<string | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
+
+  // Get visible locations based on discovery
+  const visibleLocations = getVisibleLocations(discoveredLocationIds);
 
   // Fullscreen map dimensions
   const mapWidth = 2000;
@@ -139,8 +145,6 @@ export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = (
     if (location.id === selectedLocationId) return '#fbbf24';
     if (location.id === 'shady-sands') return '#3b82f6';
     
-    if (!location.discovered) return '#6b7280'; // Gray for undiscovered
-    
     switch (location.type) {
       case 'settlement': return '#8b5cf6';
       case 'vault': return '#06b6d4';
@@ -155,8 +159,8 @@ export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = (
   const getSquadPosition = () => {
     if (!currentMission || !showSquadPosition || squadProgress === 0) return null;
     
-    const playerOutpost = CALIFORNIA_LOCATIONS.find(loc => loc.id === 'player-outpost');
-    const destination = CALIFORNIA_LOCATIONS.find(loc => loc.id === currentMission.location);
+    const playerOutpost = visibleLocations.find(loc => loc.id === 'player-outpost');
+    const destination = visibleLocations.find(loc => loc.id === currentMission.location);
     
     if (!playerOutpost || !destination) return null;
     
@@ -220,7 +224,7 @@ export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = (
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                <span className="text-foreground">Your Outpost</span>
+                <span className="text-foreground">Home Settlement</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-purple-500"></div>
@@ -271,7 +275,7 @@ export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = (
               />
 
               {/* Locations */}
-              {CALIFORNIA_LOCATIONS.map(location => {
+              {visibleLocations.map(location => {
                 const pos = coordToPixel(location.coordinates);
                 const size = getMarkerSize(location);
                 const color = getMarkerColor(location);
@@ -307,11 +311,11 @@ export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = (
                       }}
                       onMouseEnter={() => setHoveredLocation(location.id)}
                       onMouseLeave={() => setHoveredLocation(null)}
-                      onClick={() => location.discovered && onLocationSelect?.(location)}
+                      onClick={() => onLocationSelect?.(location)}
                     />
 
                     {/* Location label - always show for player outpost */}
-                    {(isHovered || isSelected || isPlayerOutpost || location.discovered) && (
+                    {(isHovered || isSelected || isPlayerOutpost) && (
                       <text
                         x={pos.x}
                         y={pos.y - size - 10}
@@ -322,12 +326,12 @@ export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = (
                           fontSize: isPlayerOutpost ? '20px' : location.id === 'shady-sands' ? '18px' : '14px'
                         }}
                       >
-                        {location.discovered ? location.name : '???'}
+                        {location.name}
                       </text>
                     )}
 
                     {/* Distance on hover */}
-                    {isHovered && location.discovered && (
+                    {isHovered && (
                       <text
                         x={pos.x}
                         y={pos.y + size + 20}
@@ -379,28 +383,21 @@ export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = (
           {hoveredLocation && (
             <div className="absolute bottom-4 left-4 z-10 bg-background/95 backdrop-blur-sm px-4 py-3 rounded-lg border border-border max-w-md">
               {(() => {
-                const location = CALIFORNIA_LOCATIONS.find(loc => loc.id === hoveredLocation);
+                const location = visibleLocations.find(loc => loc.id === hoveredLocation);
                 if (!location) return null;
                 
                 return (
                   <>
-                    <h4 className="font-bold text-foreground mb-1">{location.discovered ? location.name : 'Unknown Location'}</h4>
-                    {location.discovered && (
-                      <>
-                        <p className="text-sm text-muted-foreground mb-2">{location.description}</p>
-                        <div className="flex gap-4 text-xs">
-                          <span className="text-muted-foreground">
-                            Distance: <span className="text-foreground font-semibold">{location.distanceFromShadySands} mi</span>
-                          </span>
-                          <span className="text-muted-foreground">
-                            Danger: <span className="text-foreground font-semibold">{location.dangerLevel}/10</span>
-                          </span>
-                        </div>
-                      </>
-                    )}
-                    {!location.discovered && (
-                      <p className="text-sm text-muted-foreground">This location has not been discovered yet.</p>
-                    )}
+                    <h4 className="font-bold text-foreground mb-1">{location.name}</h4>
+                    <p className="text-sm text-muted-foreground mb-2">{location.description}</p>
+                    <div className="flex gap-4 text-xs">
+                      <span className="text-muted-foreground">
+                        Distance: <span className="text-foreground font-semibold">{location.distanceFromShadySands} mi</span>
+                      </span>
+                      <span className="text-muted-foreground">
+                        Danger: <span className="text-foreground font-semibold">{location.dangerLevel}/10</span>
+                      </span>
+                    </div>
                   </>
                 );
               })()}
