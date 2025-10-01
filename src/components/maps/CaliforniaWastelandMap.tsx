@@ -3,7 +3,6 @@ import { CALIFORNIA_LOCATIONS, CaliforniaLocation } from '@/data/CaliforniaLocat
 import { CALIFORNIA_ROADS } from '@/data/CaliforniaRoads';
 import { RoadRenderer } from './RoadRenderer';
 import { Mission } from '@/types/GameTypes';
-import { getVisibleLocations } from '@/utils/LocationDiscoverySystem';
 
 interface CaliforniaWastelandMapProps {
   currentMission?: Mission | null;
@@ -11,7 +10,6 @@ interface CaliforniaWastelandMapProps {
   selectedLocationId?: string;
   showSquadPosition?: boolean;
   squadProgress?: number; // 0-100% of mission progress
-  discoveredLocationIds?: string[];
 }
 
 export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
@@ -19,14 +17,10 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
   onLocationSelect,
   selectedLocationId,
   showSquadPosition = false,
-  squadProgress = 0,
-  discoveredLocationIds = []
+  squadProgress = 0
 }) => {
   const [hoveredLocation, setHoveredLocation] = useState<string | null>(null);
   const [hoveredRoad, setHoveredRoad] = useState<string | null>(null);
-
-  // Get visible locations based on discovery
-  const visibleLocations = getVisibleLocations(discoveredLocationIds);
 
   // Map dimensions (embedded: 1000x500, fullscreen: 2000x1800)
   const mapWidth = 1000;
@@ -73,8 +67,8 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
     if (!currentMission || !showSquadPosition || squadProgress === 0) return null;
     
     // For now, interpolate between player outpost and destination
-    const playerOutpost = visibleLocations.find(loc => loc.id === 'player-outpost');
-    const destination = visibleLocations.find(loc => loc.id === currentMission.location);
+    const playerOutpost = CALIFORNIA_LOCATIONS.find(loc => loc.id === 'player-outpost');
+    const destination = CALIFORNIA_LOCATIONS.find(loc => loc.id === currentMission.location);
     
     if (!playerOutpost || !destination) return null;
     
@@ -100,7 +94,7 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
 
       {/* SVG Map */}
       <svg 
-        viewBox="150 200 700 300"
+        viewBox="200 250 600 350"
         className="w-full h-full"
         style={{ background: '#1a1a1a' }}
       >
@@ -123,7 +117,7 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
         />
 
         {/* Render locations */}
-        {visibleLocations.map(location => {
+        {CALIFORNIA_LOCATIONS.map(location => {
           const pos = coordToPixel(location.coordinates);
           const size = getMarkerSize(location);
           const color = getMarkerColor(location);
@@ -232,7 +226,7 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
       {hoveredLocation && (
         <div className="absolute bottom-4 left-4 z-10 bg-background/95 backdrop-blur-sm px-4 py-3 rounded-lg border border-border max-w-sm">
           {(() => {
-            const location = visibleLocations.find(loc => loc.id === hoveredLocation);
+            const location = CALIFORNIA_LOCATIONS.find(loc => loc.id === hoveredLocation);
             if (!location) return null;
             
             return (

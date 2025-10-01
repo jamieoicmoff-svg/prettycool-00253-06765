@@ -67,7 +67,7 @@ export const CALIFORNIA_ROADS: RoadSegment[] = [
     speedModifier: 1.0,
     encounterChance: 0.05,
     roadType: 'interstate',
-    curveControlPoints: [{ x: 35, y: 50 }]
+    curveControlPoints: [{ x: 31, y: 56 }]
   },
 
   {
@@ -83,7 +83,7 @@ export const CALIFORNIA_ROADS: RoadSegment[] = [
     speedModifier: 1.0,
     encounterChance: 0.03,
     roadType: 'interstate',
-    curveControlPoints: [{ x: 35, y: 55 }]
+    curveControlPoints: [{ x: 31, y: 60 }]
   },
 
   {
@@ -115,7 +115,7 @@ export const CALIFORNIA_ROADS: RoadSegment[] = [
     speedModifier: 1.0,
     encounterChance: 0.04,
     roadType: 'interstate',
-    curveControlPoints: [{ x: 37, y: 63 }]
+    curveControlPoints: [{ x: 33, y: 70 }]
   },
 
   {
@@ -131,7 +131,7 @@ export const CALIFORNIA_ROADS: RoadSegment[] = [
     speedModifier: 0.7,
     encounterChance: 0.11,
     roadType: 'interstate',
-    curveControlPoints: [{ x: 35, y: 73 }]
+    curveControlPoints: [{ x: 30, y: 77 }]
   },
 
   {
@@ -213,7 +213,7 @@ export const CALIFORNIA_ROADS: RoadSegment[] = [
     speedModifier: 0.6,
     encounterChance: 0.10,
     roadType: 'interstate',
-    curveControlPoints: [{ x: 58, y: 65 }, { x: 72, y: 58 }]
+    curveControlPoints: [{ x: 55, y: 68 }, { x: 72, y: 62 }]
   },
 
   // ========== HIGHWAY 99 - Central Valley Route ==========
@@ -263,7 +263,7 @@ export const CALIFORNIA_ROADS: RoadSegment[] = [
     speedModifier: 1.0,
     encounterChance: 0.03,
     roadType: 'highway',
-    curveControlPoints: [{ x: 39, y: 61 }]
+    curveControlPoints: [{ x: 35, y: 66 }]
   },
 
   {
@@ -459,7 +459,7 @@ export const CALIFORNIA_ROADS: RoadSegment[] = [
     speedModifier: 0.7,
     encounterChance: 0.08,
     roadType: 'interstate',
-    curveControlPoints: [{ x: 28, y: 42 }]
+    curveControlPoints: [{ x: 22, y: 52 }]
   },
 
   {
@@ -561,7 +561,7 @@ export const CALIFORNIA_ROADS: RoadSegment[] = [
     speedModifier: 0.9,
     encounterChance: 0.05,
     roadType: 'minor',
-    curveControlPoints: [{ x: 35, y: 59 }]
+    curveControlPoints: [{ x: 29, y: 67 }]
   },
 
   {
@@ -625,7 +625,7 @@ export const CALIFORNIA_ROADS: RoadSegment[] = [
     speedModifier: 0.6,
     encounterChance: 0.12,
     roadType: 'minor',
-    curveControlPoints: [{ x: 32, y: 63 }]
+    curveControlPoints: [{ x: 30, y: 66 }]
   },
 
   // ========== COMBAT ZONE CONNECTIONS ==========
