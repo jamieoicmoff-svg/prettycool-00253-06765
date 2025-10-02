@@ -296,6 +296,49 @@
   }
 }
 
+@keyframes slideOutToTop {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
 .animate-slide-in-from-top {
   animation: slideInFromTop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-slide-out-to-top {
+  animation: slideOutToTop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.2s ease-out;
+}
+
+.animate-scale-out {
+  animation: scaleOut 0.25s ease-out;
 }

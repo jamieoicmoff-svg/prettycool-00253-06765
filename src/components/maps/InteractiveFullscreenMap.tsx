@@ -23,11 +23,12 @@ export const InteractiveFullscreenMap: React.FC<InteractiveFullscreenMapProps> =
 }) => {
   const [hoveredLocation, setHoveredLocation] = useState<string | null>(null);
   const [hoveredRoad, setHoveredRoad] = useState<string | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
   
-  // Pan and Zoom state - Center on Home Settlement initially
-  const homeSettlement = CALIFORNIA_LOCATIONS.find(loc => loc.id === 'player-outpost');
-  const initialViewBox = homeSettlement 
-    ? { x: homeSettlement.coordinates.x - 25, y: homeSettlement.coordinates.y - 25, width: 50, height: 50 }
+  // Pan and Zoom state - Center on Shady Sands initially
+  const shadySands = CALIFORNIA_LOCATIONS.find(loc => loc.id === 'shady-sands');
+  const initialViewBox = shadySands 
+    ? { x: shadySands.coordinates.x - 25, y: shadySands.coordinates.y - 25, width: 50, height: 50 }
     : { x: 0, y: 0, width: 100, height: 100 };
   
   const [viewBox, setViewBox] = useState(initialViewBox);
@@ -38,7 +39,16 @@ export const InteractiveFullscreenMap: React.FC<InteractiveFullscreenMapProps> =
   // Touch state for mobile
   const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
 
-  if (!isOpen) return null;
+  // Handle close with animation
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 300); // Match animation duration
+  };
+
+  if (!isOpen && !isClosing) return null;
 
   // Get location marker size (same as minimap)
   const getMarkerSize = (location: CaliforniaLocation) => {
@@ -226,9 +236,9 @@ export const InteractiveFullscreenMap: React.FC<InteractiveFullscreenMapProps> =
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col animate-fade-in">
+    <div className={`fixed inset-0 z-50 bg-black flex flex-col ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}>
       {/* Header */}
-      <div className="bg-black/90 backdrop-blur-sm border-b border-amber-500/20 p-3 flex items-center justify-between animate-slide-in-from-top">
+      <div className={`bg-black/90 backdrop-blur-sm border-b border-amber-500/20 p-3 flex items-center justify-between ${isClosing ? 'animate-slide-out-to-top' : 'animate-slide-in-from-top'}`}>
         <div className="flex items-center gap-3">
           <Maximize2 className="w-5 h-5 text-amber-400" />
           <div>
@@ -261,7 +271,7 @@ export const InteractiveFullscreenMap: React.FC<InteractiveFullscreenMapProps> =
             <Move size={18} />
           </button>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors"
           >
             <X size={18} />
@@ -270,7 +280,7 @@ export const InteractiveFullscreenMap: React.FC<InteractiveFullscreenMapProps> =
       </div>
 
       {/* Map Container */}
-      <div className="flex-1 relative overflow-hidden bg-[#1a1a1a] animate-scale-in">
+      <div className={`flex-1 relative overflow-hidden bg-[#1a1a1a] ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}>
         <svg
           ref={svgRef}
           viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
