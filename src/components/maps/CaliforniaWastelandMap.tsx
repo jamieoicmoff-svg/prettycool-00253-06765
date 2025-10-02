@@ -99,7 +99,7 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
 
       {/* SVG Map - Full California (800mi N-S × 400mi E-W) */}
       <svg 
-        viewBox="0 0 100 100"
+        viewBox="-10 47 50 50"
         className="w-full h-full cursor-pointer"
         style={{ background: '#1a1a1a' }}
         preserveAspectRatio="xMidYMid meet"

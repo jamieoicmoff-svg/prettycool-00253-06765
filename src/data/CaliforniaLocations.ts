@@ -44,13 +44,13 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
 
   {
     id: 'player-outpost',
-    name: 'Outpost Sentinel',
+    name: 'Home Settlement',
     type: 'outpost',
     coordinates: { x: 15, y: 72 }, // 180+ miles SW of Shady Sands (coastal)
     distanceFromShadySands: 185,
     dangerLevel: 3,
     terrain: 'coast',
-    description: 'Your personal settlement on the western coast, southwest of Shady Sands. A growing outpost with great potential.',
+    description: 'Your home settlement on the western coast, southwest of Shady Sands. A growing community with great potential.',
     connectedRoads: ['player-to-shady', 'player-to-losthills', 'player-to-rustcreek', 'player-to-vipers', 'player-to-chains'],
     population: 50,
     faction: 'Independent',

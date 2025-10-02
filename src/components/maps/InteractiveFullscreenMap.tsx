@@ -24,8 +24,13 @@ export const InteractiveFullscreenMap: React.FC<InteractiveFullscreenMapProps> =
   const [hoveredLocation, setHoveredLocation] = useState<string | null>(null);
   const [hoveredRoad, setHoveredRoad] = useState<string | null>(null);
   
-  // Pan and Zoom state
-  const [viewBox, setViewBox] = useState({ x: 0, y: 0, width: 100, height: 100 });
+  // Pan and Zoom state - Center on Home Settlement initially
+  const homeSettlement = CALIFORNIA_LOCATIONS.find(loc => loc.id === 'player-outpost');
+  const initialViewBox = homeSettlement 
+    ? { x: homeSettlement.coordinates.x - 25, y: homeSettlement.coordinates.y - 25, width: 50, height: 50 }
+    : { x: 0, y: 0, width: 100, height: 100 };
+  
+  const [viewBox, setViewBox] = useState(initialViewBox);
   const [isPanning, setIsPanning] = useState(false);
   const [startPan, setStartPan] = useState({ x: 0, y: 0 });
   const svgRef = useRef<SVGSVGElement>(null);
@@ -97,7 +102,7 @@ export const InteractiveFullscreenMap: React.FC<InteractiveFullscreenMapProps> =
   };
 
   const handleResetView = () => {
-    setViewBox({ x: 0, y: 0, width: 100, height: 100 });
+    setViewBox(initialViewBox);
   };
 
   // Mouse wheel zoom
@@ -221,9 +226,9 @@ export const InteractiveFullscreenMap: React.FC<InteractiveFullscreenMapProps> =
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col">
+    <div className="fixed inset-0 z-50 bg-black flex flex-col animate-fade-in">
       {/* Header */}
-      <div className="bg-black/90 backdrop-blur-sm border-b border-amber-500/20 p-3 flex items-center justify-between">
+      <div className="bg-black/90 backdrop-blur-sm border-b border-amber-500/20 p-3 flex items-center justify-between animate-slide-in-from-top">
         <div className="flex items-center gap-3">
           <Maximize2 className="w-5 h-5 text-amber-400" />
           <div>
@@ -265,7 +270,7 @@ export const InteractiveFullscreenMap: React.FC<InteractiveFullscreenMapProps> =
       </div>
 
       {/* Map Container */}
-      <div className="flex-1 relative overflow-hidden bg-[#1a1a1a]">
+      <div className="flex-1 relative overflow-hidden bg-[#1a1a1a] animate-scale-in">
         <svg
           ref={svgRef}
           viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
