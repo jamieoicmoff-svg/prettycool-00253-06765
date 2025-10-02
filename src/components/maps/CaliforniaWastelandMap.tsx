@@ -82,19 +82,19 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
 
   return (
     <div className={`relative w-full h-full bg-[#1a1a1a] rounded-lg overflow-hidden border border-border ${className}`}>
-      {/* Fullscreen button */}
-      <button
-        onClick={onFullscreenClick}
-        className="absolute top-3 right-3 z-20 bg-amber-600/90 hover:bg-amber-500 text-white p-2 rounded-lg transition-all shadow-lg flex items-center gap-2 group"
-        title="Open Fullscreen Map"
-      >
-        <Maximize2 size={16} />
-        <span className="text-xs font-semibold hidden group-hover:inline">Fullscreen</span>
-      </button>
-
-      {/* Click hint */}
-      <div className="absolute bottom-4 right-4 z-10 bg-background/90 backdrop-blur-sm px-3 py-1 rounded-lg border border-border pointer-events-none">
-        <p className="text-xs text-muted-foreground">Click locations to select</p>
+      {/* Fullscreen button - Bottom right next to hint */}
+      <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2">
+        <div className="bg-background/90 backdrop-blur-sm px-3 py-1 rounded-lg border border-border pointer-events-none">
+          <p className="text-xs text-muted-foreground">Click locations to select</p>
+        </div>
+        <button
+          onClick={onFullscreenClick}
+          className="bg-amber-600 hover:bg-amber-500 text-white px-3 py-2 rounded-lg transition-all shadow-lg flex items-center gap-2 group"
+          title="Open Fullscreen Interactive Map"
+        >
+          <Maximize2 size={16} />
+          <span className="text-xs font-semibold">Fullscreen</span>
+        </button>
       </div>
 
       {/* SVG Map - Full California (800mi N-S × 400mi E-W) */}
