@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Maximize2 } from 'lucide-react';
 import { CALIFORNIA_LOCATIONS, CaliforniaLocation } from '@/data/CaliforniaLocations';
 import { CALIFORNIA_ROADS } from '@/data/CaliforniaRoads';
 import { RoadRenderer } from './RoadRenderer';
@@ -11,6 +12,7 @@ interface CaliforniaWastelandMapProps {
   showSquadPosition?: boolean;
   squadProgress?: number; // 0-100% of mission progress
   className?: string;
+  onFullscreenClick?: () => void;
 }
 
 export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
@@ -19,7 +21,8 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
   selectedLocationId,
   showSquadPosition = false,
   squadProgress = 0,
-  className = ''
+  className = '',
+  onFullscreenClick
 }) => {
   const [hoveredLocation, setHoveredLocation] = useState<string | null>(null);
   const [hoveredRoad, setHoveredRoad] = useState<string | null>(null);
@@ -79,17 +82,28 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
 
   return (
     <div className={`relative w-full h-full bg-[#1a1a1a] rounded-lg overflow-hidden border border-border ${className}`}>
-      {/* Click to expand hint */}
-      <div className="absolute bottom-4 right-4 z-10 bg-background/90 backdrop-blur-sm px-3 py-1 rounded-lg border border-border">
-        <p className="text-xs text-muted-foreground">Click map to expand</p>
+      {/* Fullscreen button */}
+      <button
+        onClick={onFullscreenClick}
+        className="absolute top-3 right-3 z-20 bg-amber-600/90 hover:bg-amber-500 text-white p-2 rounded-lg transition-all shadow-lg flex items-center gap-2 group"
+        title="Open Fullscreen Map"
+      >
+        <Maximize2 size={16} />
+        <span className="text-xs font-semibold hidden group-hover:inline">Fullscreen</span>
+      </button>
+
+      {/* Click hint */}
+      <div className="absolute bottom-4 right-4 z-10 bg-background/90 backdrop-blur-sm px-3 py-1 rounded-lg border border-border pointer-events-none">
+        <p className="text-xs text-muted-foreground">Click locations to select</p>
       </div>
 
       {/* SVG Map - Full California (800mi N-S × 400mi E-W) */}
       <svg 
         viewBox="0 0 100 100"
-        className="w-full h-full"
+        className="w-full h-full cursor-pointer"
         style={{ background: '#1a1a1a' }}
         preserveAspectRatio="xMidYMid meet"
+        onClick={onFullscreenClick}
       >
         {/* Grid lines for reference */}
         <defs>
@@ -155,11 +169,15 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
                 style={{
                   filter: isHovered ? 'brightness(1.5)' : 'none',
                   transform: isHovered ? 'scale(1.2)' : 'scale(1)',
-                  transformOrigin: `${pos.x}% ${pos.y}%`
+                  transformOrigin: `${pos.x}% ${pos.y}%`,
+                  pointerEvents: 'all'
                 }}
                 onMouseEnter={() => setHoveredLocation(location.id)}
                 onMouseLeave={() => setHoveredLocation(null)}
-                onClick={() => onLocationSelect?.(location)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onLocationSelect?.(location);
+                }}
               />
 
               {/* Location label - show for important locations */}
@@ -168,7 +186,7 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
                   x={pos.x}
                   y={pos.y - size - 1.5}
                   textAnchor="middle"
-                  className="fill-foreground text-[1.2px] font-bold pointer-events-none"
+                  className="fill-foreground text-[1.2px] font-bold pointer-events-none select-none"
                   style={{ 
                     textShadow: '0 0 2px #000, 0 0 4px #000',
                     fontSize: isPlayerOutpost || isShadySands ? '1.4px' : '1.2px'
@@ -184,7 +202,7 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
                   x={pos.x}
                   y={pos.y + size + 2.5}
                   textAnchor="middle"
-                  className="fill-muted-foreground text-[1px] pointer-events-none"
+                  className="fill-muted-foreground text-[1px] pointer-events-none select-none"
                   style={{ textShadow: '0 0 2px #000' }}
                 >
                   {location.distanceFromShadySands} mi | Danger: {location.dangerLevel}/10
@@ -217,7 +235,7 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
               x={squadPos.x}
               y={squadPos.y - 2.5}
               textAnchor="middle"
-              className="fill-green-400 text-[1.2px] font-bold pointer-events-none"
+              className="fill-green-400 text-[1.2px] font-bold pointer-events-none select-none"
               style={{ textShadow: '0 0 2px #000' }}
             >
               YOUR SQUAD
@@ -228,7 +246,7 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
 
       {/* Hovered location info panel */}
       {hoveredLocation && (
-        <div className="absolute bottom-4 left-4 z-10 bg-background/95 backdrop-blur-sm px-4 py-3 rounded-lg border border-border max-w-sm">
+        <div className="absolute bottom-4 left-4 z-10 bg-background/95 backdrop-blur-sm px-4 py-3 rounded-lg border border-border max-w-sm pointer-events-none">
           {(() => {
             const location = CALIFORNIA_LOCATIONS.find(loc => loc.id === hoveredLocation);
             if (!location) return null;

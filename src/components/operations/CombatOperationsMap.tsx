@@ -3,7 +3,7 @@ import { MapPin, Clock, Users, Route, Eye, Crosshair } from 'lucide-react';
 import { CALIFORNIA_LOCATIONS, getCaliforniaLocationById } from '@/data/CaliforniaLocations';
 import { CombatTarget } from '@/components/combat/CombatTargets';
 import { CaliforniaWastelandMap } from '@/components/maps/CaliforniaWastelandMap';
-import { FullscreenCaliforniaMap } from '@/components/maps/FullscreenCaliforniaMap';
+import { InteractiveFullscreenMap } from '@/components/maps/InteractiveFullscreenMap';
 
 interface CombatOperationsMapProps {
   onSelectLocation: (locationId: string) => void;
@@ -65,14 +65,15 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
   };
 
   return (
-    <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-amber-500/20 p-4">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center space-x-2">
-          <Crosshair className="w-5 h-5 text-red-400" />
-          <h3 className="text-red-400 font-bold">Combat Operations Map</h3>
+    <>
+      <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-amber-500/20 p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-2">
+            <Crosshair className="w-5 h-5 text-red-400" />
+            <h3 className="text-red-400 font-bold">Combat Operations Map</h3>
+          </div>
         </div>
-      </div>
-        
+          
         {/* Active Combat Info */}
         {activeCombat && (
           <div className="grid grid-cols-3 gap-3 mb-4 text-sm">
@@ -96,26 +97,18 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
             </div>
           </div>
         )}
-        
+          
         {/* California Wasteland Map */}
-        <div className="h-[500px] cursor-pointer" onClick={() => setIsFullscreenOpen(true)}>
+        <div className="h-[500px]">
           <CaliforniaWastelandMap
             onLocationSelect={(location) => onSelectLocation(location.id)}
             selectedLocationId={selectedLocation}
             showSquadPosition={!!activeCombat}
             squadProgress={progress}
-        />
-      </div>
-
-      <FullscreenCaliforniaMap
-        isOpen={isFullscreenOpen}
-        onClose={() => setIsFullscreenOpen(false)}
-        onLocationSelect={(location) => onSelectLocation(location.id)}
-        selectedLocationId={selectedLocation}
-        showSquadPosition={!!activeCombat}
-        squadProgress={progress}
-      />
-        
+            onFullscreenClick={() => setIsFullscreenOpen(true)}
+          />
+        </div>
+          
         {/* Selected Location Details */}
         {selectedLocation && (
           <div className="mt-3 text-xs">
@@ -154,7 +147,18 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
             })()}
           </div>
         )}
-    </div>
+      </div>
+
+      {/* Interactive Fullscreen Map */}
+      <InteractiveFullscreenMap
+        isOpen={isFullscreenOpen}
+        onClose={() => setIsFullscreenOpen(false)}
+        onLocationSelect={(location) => onSelectLocation(location.id)}
+        selectedLocationId={selectedLocation}
+        showSquadPosition={!!activeCombat}
+        squadProgress={progress}
+      />
+    </>
   );
 };
 
