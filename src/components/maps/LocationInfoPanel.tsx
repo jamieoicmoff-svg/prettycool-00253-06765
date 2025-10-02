@@ -59,7 +59,7 @@ export const LocationInfoPanel: React.FC<LocationInfoPanelProps> = ({ location, 
               <MapPin className="w-4 h-4 text-blue-400" />
               <div>
                 <div className="text-xs text-muted-foreground">Distance</div>
-                <div className="text-sm font-semibold text-foreground">{location.distanceFromShadySands} mi</div>
+                <div className="text-sm font-semibold text-foreground">{location.distanceFromHome} mi</div>
               </div>
             </div>
 

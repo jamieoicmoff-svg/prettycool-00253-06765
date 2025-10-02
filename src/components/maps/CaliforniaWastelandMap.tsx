@@ -204,7 +204,7 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
                   className="fill-muted-foreground text-[1px] pointer-events-none select-none"
                   style={{ textShadow: '0 0 2px #000' }}
                 >
-                  {location.distanceFromShadySands} mi | Danger: {location.dangerLevel}/10
+                  {location.distanceFromHome} mi | Danger: {location.dangerLevel}/10
                 </text>
               )}
             </g>
@@ -256,7 +256,7 @@ export const CaliforniaWastelandMap: React.FC<CaliforniaWastelandMapProps> = ({
                 <p className="text-sm text-muted-foreground mb-2">{location.description}</p>
                 <div className="flex gap-4 text-xs">
                   <span className="text-muted-foreground">
-                    Distance: <span className="text-foreground font-semibold">{location.distanceFromShadySands} mi</span>
+                    Distance: <span className="text-foreground font-semibold">{location.distanceFromHome} mi</span>
                   </span>
                   <span className="text-muted-foreground">
                     Danger: <span className="text-foreground font-semibold">{location.dangerLevel}/10</span>

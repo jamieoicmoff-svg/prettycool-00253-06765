@@ -186,7 +186,7 @@ export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = (
                     className="fill-muted-foreground text-[0.9px] pointer-events-none"
                     style={{ textShadow: '0 0 2px #000' }}
                   >
-                    {location.distanceFromShadySands} mi
+                    {location.distanceFromHome} mi
                   </text>
                 )}
 
@@ -199,7 +199,7 @@ export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = (
                     className="fill-foreground text-[1.1px] pointer-events-none"
                     style={{ textShadow: '0 0 2px #000, 0 0 4px #000' }}
                   >
-                    {location.distanceFromShadySands} mi • {location.terrain} • Danger {location.dangerLevel}/10
+                    {location.distanceFromHome} mi • {location.terrain} • Danger {location.dangerLevel}/10
                   </text>
                 )}
               </g>
@@ -282,7 +282,7 @@ export const FullscreenCaliforniaMap: React.FC<FullscreenCaliforniaMapProps> = (
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Distance:</span>
-                      <span className="text-foreground font-semibold ml-2">{location.distanceFromShadySands} mi</span>
+                      <span className="text-foreground font-semibold ml-2">{location.distanceFromHome} mi</span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Danger:</span>

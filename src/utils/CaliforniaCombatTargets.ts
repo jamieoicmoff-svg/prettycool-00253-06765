@@ -53,7 +53,7 @@ function createTargetFromLocation(location: CaliforniaLocation): CombatTarget {
   }
 
   // Calculate rewards based on difficulty and distance
-  const baseReward = 100 + (difficulty * 50) + (location.distanceFromShadySands * 2);
+  const baseReward = 100 + (difficulty * 50) + (location.distanceFromHome * 2);
   const rewards = {
     caps: Math.floor(baseReward * (0.8 + Math.random() * 0.4)),
     experience: Math.floor(baseReward * 0.8),
@@ -308,13 +308,13 @@ function getLootPoolForFaction(faction: string, difficulty: number): string[] {
   return pool;
 }
 
-// Get combat targets within a specific distance range (from Shady Sands)
+// Get combat targets within a specific distance range (from Home Settlement)
 export function getCombatTargetsByDistance(minDistance: number, maxDistance: number): CombatTarget[] {
-  const shadySands = CALIFORNIA_LOCATIONS.find(loc => loc.id === 'shady-sands');
-  if (!shadySands) return [];
+  const homeSettlement = CALIFORNIA_LOCATIONS.find(loc => loc.id === 'player-outpost');
+  if (!homeSettlement) return [];
   
-  const combatLocations = getCombatLocationsInRange(shadySands, maxDistance).filter(
-    loc => loc.distanceFromShadySands >= minDistance
+  const combatLocations = getCombatLocationsInRange(homeSettlement, maxDistance).filter(
+    loc => loc.distanceFromHome >= minDistance
   );
   return combatLocations.map(location => createTargetFromLocation(location));
 }

@@ -406,7 +406,7 @@ export const InteractiveFullscreenMap: React.FC<InteractiveFullscreenMapProps> =
                     className="fill-muted-foreground pointer-events-none select-none"
                     style={{ textShadow: '0 0 2px #000', fontSize: '1px' }}
                   >
-                    {location.distanceFromShadySands} mi
+                    {location.distanceFromHome} mi
                   </text>
                 )}
 
@@ -419,7 +419,7 @@ export const InteractiveFullscreenMap: React.FC<InteractiveFullscreenMapProps> =
                     className="fill-foreground pointer-events-none select-none"
                     style={{ textShadow: '0 0 2px #000, 0 0 4px #000', fontSize: '1.2px' }}
                   >
-                    {location.distanceFromShadySands} mi • {location.terrain} • Danger {location.dangerLevel}/10
+                    {location.distanceFromHome} mi • {location.terrain} • Danger {location.dangerLevel}/10
                   </text>
                 )}
               </g>
@@ -503,7 +503,7 @@ export const InteractiveFullscreenMap: React.FC<InteractiveFullscreenMapProps> =
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Distance:</span>
-                      <span className="text-foreground font-semibold ml-2">{location.distanceFromShadySands} mi</span>
+                      <span className="text-foreground font-semibold ml-2">{location.distanceFromHome} mi</span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Danger:</span>

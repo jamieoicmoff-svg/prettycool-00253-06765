@@ -3,14 +3,14 @@
 // Map dimensions: 800 miles (N-S) × 400 miles (E-W)
 // Coordinate system: Percentage (0-100) for both X and Y
 // Scale: 1% X = ~4 miles, 1% Y = ~8 miles
-// Center reference: Shady Sands (NCR Capital) at { x: 35, y: 50 }
+// Center reference: Home Settlement at { x: 15, y: 72 }
 
 export interface CaliforniaLocation {
   id: string;
   name: string;
   type: 'settlement' | 'vault' | 'ruins' | 'facility' | 'combat' | 'outpost' | 'landmark';
   coordinates: { x: number; y: number }; // Percentage (0-100)
-  distanceFromShadySands: number; // Miles via roads
+  distanceFromHome: number; // Miles via roads from Home Settlement
   dangerLevel: number; // 1-10
   terrain: 'desert' | 'ruins' | 'mountains' | 'urban' | 'wasteland' | 'coast' | 'facility';
   description: string;
@@ -29,8 +29,8 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     id: 'shady-sands',
     name: 'Shady Sands (NCR)',
     type: 'settlement',
-    coordinates: { x: 35, y: 50 }, // CENTER POINT - Central California
-    distanceFromShadySands: 0,
+    coordinates: { x: 35, y: 50 }, // Central California
+    distanceFromHome: 92,
     dangerLevel: 1,
     terrain: 'urban',
     description: 'Capital of the New California Republic. The safest and most prosperous settlement in the wasteland.',
@@ -46,8 +46,8 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     id: 'player-outpost',
     name: 'Home Settlement',
     type: 'outpost',
-    coordinates: { x: 15, y: 72 }, // 180+ miles SW of Shady Sands (coastal)
-    distanceFromShadySands: 185,
+    coordinates: { x: 15, y: 72 }, // Western coast - Your home base
+    distanceFromHome: 0,
     dangerLevel: 3,
     terrain: 'coast',
     description: 'Your home settlement on the western coast, southwest of Shady Sands. A growing community with great potential.',
@@ -64,7 +64,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Vault 13',
     type: 'vault',
     coordinates: { x: 18, y: 52 }, // West of Shady Sands, coastal mountains
-    distanceFromShadySands: 72,
+    distanceFromHome: 52,
     dangerLevel: 5,
     terrain: 'mountains',
     description: 'The original vault. Home to the Vault Dweller who saved the wasteland.',
@@ -81,7 +81,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Vault 15',
     type: 'vault',
     coordinates: { x: 38, y: 58 }, // Southeast of Shady Sands
-    distanceFromShadySands: 68,
+    distanceFromHome: 78,
     dangerLevel: 6,
     terrain: 'ruins',
     description: 'Partially collapsed vault. Origin of Shady Sands founders. Now occupied by raiders.',
@@ -97,7 +97,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Junktown',
     type: 'settlement',
     coordinates: { x: 40, y: 68 }, // South of Shady Sands
-    distanceFromShadySands: 152,
+    distanceFromHome: 65,
     dangerLevel: 4,
     terrain: 'wasteland',
     description: 'A fortified settlement built from scrap. Rough but honest folk run a tight ship.',
@@ -114,7 +114,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'The Hub',
     type: 'settlement',
     coordinates: { x: 52, y: 72 }, // Southeast, major trading center
-    distanceFromShadySands: 198,
+    distanceFromHome: 148,
     dangerLevel: 3,
     terrain: 'desert',
     description: 'The trading center of the wasteland. All caravans pass through here.',
@@ -131,7 +131,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'The Boneyard',
     type: 'settlement',
     coordinates: { x: 22, y: 84 }, // Los Angeles area - south
-    distanceFromShadySands: 285,
+    distanceFromHome: 38,
     dangerLevel: 6,
     terrain: 'ruins',
     description: 'The ruins of Los Angeles. A sprawling graveyard of pre-war civilization.',
@@ -148,7 +148,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Necropolis',
     type: 'ruins',
     coordinates: { x: 18, y: 86 }, // Near Boneyard, irradiated
-    distanceFromShadySands: 305,
+    distanceFromHome: 45,
     dangerLevel: 7,
     terrain: 'ruins',
     description: 'A city of ghouls in the radioactive ruins. Dangerous for smoothskins.',
@@ -165,7 +165,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Dayglow',
     type: 'settlement',
     coordinates: { x: 24, y: 96 }, // San Diego - far south
-    distanceFromShadySands: 390,
+    distanceFromHome: 78,
     dangerLevel: 6,
     terrain: 'coast',
     description: 'The glowing city. Ghoul scientists and traders inhabit this irradiated port.',
@@ -182,7 +182,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'San Francisco',
     type: 'settlement',
     coordinates: { x: 12, y: 48 }, // Bay Area - northwest coast
-    distanceFromShadySands: 205,
+    distanceFromHome: 62,
     dangerLevel: 6,
     terrain: 'urban',
     description: 'The city by the bay. Shi Empire territory with advanced technology.',
@@ -199,7 +199,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Gecko',
     type: 'settlement',
     coordinates: { x: 38, y: 42 }, // North of Shady Sands
-    distanceFromShadySands: 78,
+    distanceFromHome: 85,
     dangerLevel: 4,
     terrain: 'wasteland',
     description: 'Ghoul settlement with an old nuclear power plant. Friendly but irradiated.',
@@ -216,7 +216,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Redding',
     type: 'settlement',
     coordinates: { x: 32, y: 18 }, // Far north
-    distanceFromShadySands: 268,
+    distanceFromHome: 175,
     dangerLevel: 5,
     terrain: 'mountains',
     description: 'Mining town in the northern territories. Tough miners extract precious ore.',
@@ -233,7 +233,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'New Reno',
     type: 'settlement',
     coordinates: { x: 60, y: 28 }, // Northeast
-    distanceFromShadySands: 280,
+    distanceFromHome: 220,
     dangerLevel: 7,
     terrain: 'urban',
     description: 'City of sin controlled by crime families. Dangerous but profitable.',
@@ -250,7 +250,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Vault City',
     type: 'settlement',
     coordinates: { x: 52, y: 32 }, // Northeast, advanced settlement
-    distanceFromShadySands: 245,
+    distanceFromHome: 190,
     dangerLevel: 2,
     terrain: 'urban',
     description: 'Advanced settlement with strict laws and cutting-edge technology.',
@@ -267,7 +267,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'New Vegas',
     type: 'settlement',
     coordinates: { x: 88, y: 64 }, // Far east (Mojave)
-    distanceFromShadySands: 380,
+    distanceFromHome: 293,
     dangerLevel: 5,
     terrain: 'urban',
     description: 'The jewel of the Mojave. A city of lights and vice on the eastern frontier.',
@@ -284,7 +284,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Lost Hills',
     type: 'facility',
     coordinates: { x: 12, y: 68 }, // Hidden BOS bunker - southwest mountains
-    distanceFromShadySands: 195,
+    distanceFromHome: 12,
     dangerLevel: 8,
     terrain: 'mountains',
     description: 'Hidden Brotherhood of Steel bunker. Location is highly classified.',
@@ -301,7 +301,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Navarro',
     type: 'facility',
     coordinates: { x: 8, y: 12 }, // Far northwest coast
-    distanceFromShadySands: 420,
+    distanceFromHome: 155,
     dangerLevel: 10,
     terrain: 'facility',
     description: 'Secret Enclave base. Extremely dangerous. Late-game content.',
@@ -319,7 +319,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'NCR Highway Patrol - North',
     type: 'outpost',
     coordinates: { x: 35, y: 40 },
-    distanceFromShadySands: 80,
+    distanceFromHome: 105,
     dangerLevel: 1,
     terrain: 'desert',
     description: 'NCR military checkpoint ensuring safe travel on the northern routes.',
@@ -335,7 +335,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'NCR Highway Patrol - South',
     type: 'outpost',
     coordinates: { x: 38, y: 62 },
-    distanceFromShadySands: 98,
+    distanceFromHome: 72,
     dangerLevel: 2,
     terrain: 'desert',
     description: 'NCR checkpoint protecting the southern trade routes.',
@@ -351,7 +351,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Crimson Caravan Waystation',
     type: 'outpost',
     coordinates: { x: 45, y: 65 },
-    distanceFromShadySands: 128,
+    distanceFromHome: 120,
     dangerLevel: 3,
     terrain: 'wasteland',
     description: 'Caravan rest stop and trading post. Neutral ground for all factions.',
@@ -369,7 +369,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: "Viper's Nest",
     type: 'combat',
     coordinates: { x: 20, y: 62 }, // ~85 miles from player
-    distanceFromShadySands: 112,
+    distanceFromHome: 32,
     dangerLevel: 4,
     terrain: 'wasteland',
     description: 'Viper gang camp with scrap metal walls and guard towers. Hostile raiders.',
@@ -385,7 +385,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Rust Creek Station',
     type: 'combat',
     coordinates: { x: 18, y: 78 }, // ~65 miles from player
-    distanceFromShadySands: 235,
+    distanceFromHome: 20,
     dangerLevel: 3,
     terrain: 'wasteland',
     description: 'Abandoned gas station overrun by desperate scavengers and radroaches.',
@@ -401,7 +401,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Scorpion Gulch',
     type: 'combat',
     coordinates: { x: 28, y: 68 }, // ~75 miles from player
-    distanceFromShadySands: 158,
+    distanceFromHome: 52,
     dangerLevel: 5,
     terrain: 'desert',
     description: 'Rocky canyon filled with giant radscorpion nests. Highly dangerous.',
@@ -417,7 +417,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: "Chains' Camp",
     type: 'combat',
     coordinates: { x: 10, y: 65 }, // ~90 miles from player
-    distanceFromShadySands: 165,
+    distanceFromHome: 22,
     dangerLevel: 6,
     terrain: 'wasteland',
     description: 'Fortified slaver camp with caged prisoners. Heavily armed guards.',
@@ -433,7 +433,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Broken Wheel Settlement',
     type: 'combat',
     coordinates: { x: 25, y: 58 }, // ~70 miles from player
-    distanceFromShadySands: 98,
+    distanceFromHome: 48,
     dangerLevel: 4,
     terrain: 'wasteland',
     description: 'Paranoid settlement that shoots strangers on sight. Former farmers turned hostile.',
@@ -449,7 +449,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Highway 5 Tollbooth',
     type: 'combat',
     coordinates: { x: 35, y: 58 }, // ~90 miles from player
-    distanceFromShadySands: 64,
+    distanceFromHome: 68,
     dangerLevel: 5,
     terrain: 'desert',
     description: 'Raiders extorting travelers on Interstate 5. Dangerous checkpoint.',
@@ -465,7 +465,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Greenfield Ruins',
     type: 'combat',
     coordinates: { x: 42, y: 75 }, // ~120 miles from player
-    distanceFromShadySands: 210,
+    distanceFromHome: 108,
     dangerLevel: 6,
     terrain: 'ruins',
     description: 'Irradiated town ruins crawling with feral ghouls. High radiation.',
@@ -481,7 +481,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Old Fort Irwin',
     type: 'combat',
     coordinates: { x: 48, y: 78 }, // ~150 miles from player
-    distanceFromShadySands: 245,
+    distanceFromHome: 135,
     dangerLevel: 7,
     terrain: 'facility',
     description: 'Abandoned military base with active defense robots. Extremely dangerous.',
@@ -497,7 +497,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Deathclaw Pass',
     type: 'combat',
     coordinates: { x: 42, y: 45 }, // ~110 miles from player
-    distanceFromShadySands: 58,
+    distanceFromHome: 115,
     dangerLevel: 9,
     terrain: 'mountains',
     description: 'Mountain pass claimed by deadly deathclaws. Almost certain death.',
@@ -513,7 +513,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Camp Searchlight',
     type: 'combat',
     coordinates: { x: 12, y: 78 }, // ~75 miles from player
-    distanceFromShadySands: 245,
+    distanceFromHome: 18,
     dangerLevel: 5,
     terrain: 'facility',
     description: 'Former raider base destroyed by radiation leak. Irradiated enemies.',
@@ -531,7 +531,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: "The Master's Cathedral",
     type: 'ruins',
     coordinates: { x: 20, y: 82 },
-    distanceFromShadySands: 275,
+    distanceFromHome: 35,
     dangerLevel: 8,
     terrain: 'ruins',
     description: 'Destroyed cathedral. Former home of the Master and the Unity.',
@@ -547,7 +547,7 @@ export const CALIFORNIA_LOCATIONS: CaliforniaLocation[] = [
     name: 'Mariposa Military Base',
     type: 'facility',
     coordinates: { x: 28, y: 38 },
-    distanceFromShadySands: 105,
+    distanceFromHome: 95,
     dangerLevel: 9,
     terrain: 'facility',
     description: 'Source of the FEV virus. Heavily guarded by super mutants.',

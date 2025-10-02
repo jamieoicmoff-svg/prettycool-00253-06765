@@ -123,7 +123,7 @@ export const CombatOperationsMap: React.FC<CombatOperationsMapProps> = ({
                   </div>
                   <div>
                     <div className="text-gray-400">Distance</div>
-                    <div className="text-blue-400 font-bold">{location.distanceFromShadySands} mi</div>
+                    <div className="text-blue-400 font-bold">{location.distanceFromHome} mi</div>
                   </div>
                   <div>
                     <div className="text-gray-400">Danger Level</div>
